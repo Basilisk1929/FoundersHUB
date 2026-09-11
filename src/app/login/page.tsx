@@ -10,12 +10,21 @@ import { useAuth } from '@/components/auth/AuthContext';
 
 export default function LoginPage() {
   const router = useRouter();
-  const { login } = useAuth();
+  const { user, login } = useAuth();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+
+  // Auto-redirect if already logged in
+  React.useEffect(() => {
+    if (user) {
+      if (user.role === 'founder') router.replace('/dashboard/founder');
+      else if (user.role === 'developer') router.replace('/dashboard/developer');
+      else if (user.role === 'investor') router.replace('/dashboard/investor');
+    }
+  }, [user, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -26,7 +35,16 @@ export default function LoginPage() {
     setIsLoading(false);
 
     if (result.success) {
-      router.push('/discover');
+      const role = result.user?.role || 'founder';
+      if (role === 'founder') {
+        router.push('/dashboard/founder');
+      } else if (role === 'developer') {
+        router.push('/dashboard/developer');
+      } else if (role === 'investor') {
+        router.push('/dashboard/investor');
+      } else {
+        router.push('/dashboard/founder');
+      }
     } else {
       setError(result.error || 'Invalid credentials');
     }

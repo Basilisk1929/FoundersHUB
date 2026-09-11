@@ -5,6 +5,7 @@ import { ThemeProvider } from "@/components/theme/ThemeProvider";
 import { AuthProvider } from "@/components/auth/AuthContext";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
+import { AppShell } from "@/components/layout/AppShell";
 import { FloatingChatbot } from "@/components/chat/FloatingChatbot";
 
 const geistSans = Geist({
@@ -45,10 +46,12 @@ export default function RootLayout({
         <ThemeProvider>
           <AuthProvider>
             <Navbar />
-            <main className="flex-1">
-              {children}
-            </main>
-            <Footer />
+            <AppShell>
+              <main className="flex-1">
+                {children}
+              </main>
+              <Footer />
+            </AppShell>
             <FloatingChatbot />
           </AuthProvider>
         </ThemeProvider>

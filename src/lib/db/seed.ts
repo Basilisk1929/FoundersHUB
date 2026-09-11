@@ -32,6 +32,36 @@ export async function ensureSeedData() {
     if (!invUser) {
       await usersCol.updateOne({ _id: 'usr_investor_vikram' }, { $set: { email: 'investor@founderhub.com', name: 'Vikram Mehta' } });
     }
+
+    // Ensure sample startups have pitch videos, decks, and image assets
+    const startupsCol = db.collection<StartupDoc>('startups');
+    await startupsCol.updateOne(
+      { _id: 'stp_kubescale' },
+      { 
+        $set: { 
+          pitchVideoUrl: 'https://www.youtube.com/watch?v=M576WGiDBdQ',
+          pitchDeckUrl: 'https://docs.google.com/presentation/d/1gL6Gg0q9y1d2s3a4b5c6d7e8f9g0h1i2j3k4l5m6n7o/edit',
+          images: [
+            'https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=800&auto=format&fit=crop&q=80',
+            'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=800&auto=format&fit=crop&q=80',
+            'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=800&auto=format&fit=crop&q=80'
+          ]
+        } 
+      }
+    );
+    await startupsCol.updateOne(
+      { _id: 'stp_neuroflow' },
+      { 
+        $set: { 
+          pitchVideoUrl: 'https://www.youtube.com/watch?v=jfKfPfyJRdk',
+          pitchDeckUrl: 'https://docs.google.com/presentation/d/1yZ2a3b4c5d6e7f8g9h0i1j2k3l4m5n6o7p8q9r0s1t/edit',
+          images: [
+            'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=800&auto=format&fit=crop&q=80',
+            'https://images.unsplash.com/photo-1505751172876-fa1923c5c528?w=800&auto=format&fit=crop&q=80'
+          ]
+        } 
+      }
+    );
     return;
   }
 
@@ -143,8 +173,13 @@ export async function ensureSeedData() {
       tags: ['Kubernetes', 'eBPF', 'DevOps', 'Cloud Cost', 'AI'],
       stage: 'sprint_active',
       proposedEquitySplit: { 'Alex Rivera (Founder)': 60, 'Builders Pool': 30, 'Advisors': 10 },
-      images: ['https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=800&auto=format&fit=crop&q=80'],
-      pitchDeckUrl: 'https://files.foundershub.dev/decks/kubescale-deck.pdf',
+      images: [
+        'https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=800&auto=format&fit=crop&q=80',
+        'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=800&auto=format&fit=crop&q=80',
+        'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=800&auto=format&fit=crop&q=80'
+      ],
+      pitchDeckUrl: 'https://docs.google.com/presentation/d/1gL6Gg0q9y1d2s3a4b5c6d7e8f9g0h1i2j3k4l5m6n7o/edit',
+      pitchVideoUrl: 'https://www.youtube.com/watch?v=M576WGiDBdQ',
       visibility: 'public',
       executionScore: 78,
       activeSprintId: sprint1Id,
@@ -166,7 +201,12 @@ export async function ensureSeedData() {
       stage: 'sprint_completed',
       proposedEquitySplit: { 'Alex Rivera (Founder)': 55, 'Priya Sharma (Tech)': 25, 'Marcus Vance (Design)': 12, 'Advisors': 8 },
       vestedEquitySplit: { 'Alex Rivera (Founder)': 55, 'Priya Sharma (Tech)': 25, 'Marcus Vance (Design)': 12, 'Advisors': 8 },
-      images: ['https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=800&auto=format&fit=crop&q=80'],
+      images: [
+        'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=800&auto=format&fit=crop&q=80',
+        'https://images.unsplash.com/photo-1505751172876-fa1923c5c528?w=800&auto=format&fit=crop&q=80'
+      ],
+      pitchDeckUrl: 'https://docs.google.com/presentation/d/1yZ2a3b4c5d6e7f8g9h0i1j2k3l4m5n6o7p8q9r0s1t/edit',
+      pitchVideoUrl: 'https://www.youtube.com/watch?v=jfKfPfyJRdk',
       visibility: 'public',
       executionScore: 89,
       activeSprintId: sprint2Id,

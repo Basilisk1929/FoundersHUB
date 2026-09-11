@@ -25,6 +25,7 @@ import { Badge } from '@/components/ui/Badge';
 import { ProgressRing } from '@/components/ui/ProgressRing';
 import { Modal } from '@/components/ui/Modal';
 import { useAuth } from '@/components/auth/AuthContext';
+import { PitchMediaViewer } from '@/components/media/PitchMediaViewer';
 import { StartupDoc, SprintDoc, TimelineEventDoc } from '@/types';
 
 const COLORS = ['#6366f1', '#38bdf8', '#a855f7', '#10b981', '#f59e0b', '#ec4899'];
@@ -253,9 +254,17 @@ export default function StartupProfilePage() {
       {/* Main Grid: Details + Metrics */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         
-        {/* Left 2 Cols: Problem, Validation, Departments */}
+        {/* Left 2 Cols: Pitch Assets, Problem, Validation, Departments */}
         <div className="lg:col-span-2 space-y-6">
           
+          {/* Pitch Video, PPT & Media Deck */}
+          <PitchMediaViewer
+            pitchVideoUrl={startup.pitchVideoUrl}
+            pitchDeckUrl={startup.pitchDeckUrl}
+            images={startup.images}
+            startupName={startup.name}
+          />
+
           {/* Problem Statement Card */}
           <div className="glass-panel p-6 border border-white/10 space-y-3">
             <h3 className="text-base font-bold text-white flex items-center gap-2">

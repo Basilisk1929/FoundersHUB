@@ -118,7 +118,7 @@ export default function DeveloperDashboardPage() {
         </div>
 
         {/* Total Points & Est Equity Card */}
-        <div className="flex items-center gap-4 p-3 rounded-2xl glass-panel-glow border border-sky-500/30">
+        <div id="vesting" className="flex items-center gap-4 p-3 rounded-2xl glass-panel-glow border border-sky-500/30">
           <div className="flex items-center gap-2">
             <div className="w-9 h-9 rounded-xl bg-sky-500/20 text-sky-400 font-bold flex items-center justify-center">
               ⚡
@@ -194,7 +194,7 @@ export default function DeveloperDashboardPage() {
           </div>
 
           {/* Assigned & Available Sprint Deliverables */}
-          <div className="glass-panel p-6 border border-white/10 space-y-4">
+          <div id="tasks" className="glass-panel p-6 border border-white/10 space-y-4">
             <div className="flex items-center justify-between">
               <h3 className="text-base font-bold text-white flex items-center gap-2">
                 <CheckCircle2 className="w-4 h-4 text-indigo-400" />

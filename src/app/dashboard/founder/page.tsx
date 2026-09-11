@@ -32,6 +32,7 @@ import { Badge } from '@/components/ui/Badge';
 import { Modal } from '@/components/ui/Modal';
 import { ProgressRing } from '@/components/ui/ProgressRing';
 import { useAuth } from '@/components/auth/AuthContext';
+import { PitchMediaViewer, getYouTubeEmbedUrl } from '@/components/media/PitchMediaViewer';
 import { StartupDoc, SprintDoc, DepartmentDoc, ApplicationDoc, FundingRequestDoc } from '@/types';
 
 function FounderDashboardContent() {
@@ -65,6 +66,9 @@ function FounderDashboardContent() {
   const [editValidation, setEditValidation] = useState('');
   const [editFounderEquity, setEditFounderEquity] = useState(70);
   const [editBuildersEquity, setEditBuildersEquity] = useState(30);
+  const [editPitchVideoUrl, setEditPitchVideoUrl] = useState('');
+  const [editPitchDeckUrl, setEditPitchDeckUrl] = useState('');
+  const [editImages, setEditImages] = useState('');
   const [isUpdating, setIsUpdating] = useState(false);
 
   // Delete Startup Modal
@@ -98,6 +102,21 @@ function FounderDashboardContent() {
 
   useEffect(() => {
     fetchFounderData();
+
+    const handleHash = () => {
+      if (typeof window !== 'undefined') {
+        const h = window.location.hash;
+        if (h === '#new-idea' || h === '#create') {
+          setCreateModalOpen(true);
+        } else if (h === '#copilot') {
+          setCopilotOpen(true);
+        }
+      }
+    };
+
+    handleHash();
+    window.addEventListener('hashchange', handleHash);
+    return () => window.removeEventListener('hashchange', handleHash);
   }, [initialStartupId]);
 
   const fetchFounderData = async () => {
@@ -131,6 +150,9 @@ function FounderDashboardContent() {
     setEditValidation(st.validationEvidence || '');
     setEditFounderEquity(st.proposedEquitySplit?.['Founder'] ?? 70);
     setEditBuildersEquity(st.proposedEquitySplit?.['Builders Pool'] ?? 30);
+    setEditPitchVideoUrl(st.pitchVideoUrl || '');
+    setEditPitchDeckUrl(st.pitchDeckUrl || '');
+    setEditImages((st.images || []).join('\n'));
     setIsFundingPaused(Boolean(st.isFundingPaused));
     setMinTicketSize(String(st.minTicketSize || 25000));
     try {
@@ -165,6 +187,9 @@ function FounderDashboardContent() {
     setEditValidation(selectedStartup.validationEvidence || '');
     setEditFounderEquity(selectedStartup.proposedEquitySplit?.['Founder'] ?? 70);
     setEditBuildersEquity(selectedStartup.proposedEquitySplit?.['Builders Pool'] ?? 30);
+    setEditPitchVideoUrl(selectedStartup.pitchVideoUrl || '');
+    setEditPitchDeckUrl(selectedStartup.pitchDeckUrl || '');
+    setEditImages((selectedStartup.images || []).join('\n'));
     setEditModalOpen(true);
   };
 
@@ -191,6 +216,9 @@ function FounderDashboardContent() {
           sector: editSector,
           problemStatement: editProblem,
           validationEvidence: editValidation,
+          pitchVideoUrl: editPitchVideoUrl.trim() || undefined,
+          pitchDeckUrl: editPitchDeckUrl.trim() || undefined,
+          images: editImages.split('\n').map(s => s.trim()).filter(Boolean),
           proposedEquitySplit: split
         })
       });
@@ -560,7 +588,7 @@ function FounderDashboardContent() {
       </div>
 
       {/* Startups Selector Horizontal Carousel */}
-      <div className="flex items-center gap-3 overflow-x-auto pb-2">
+      <div id="ideas" className="flex items-center gap-3 overflow-x-auto pb-2">
         {startups.map(st => {
           const isSelected = selectedStartup?._id === st._id;
           return (
@@ -768,9 +796,21 @@ function FounderDashboardContent() {
             </div>
           )}
 
+          {/* Pitch Assets & Presentation Media Deck */}
+          <div id="media">
+            <PitchMediaViewer
+              pitchVideoUrl={selectedStartup.pitchVideoUrl}
+              pitchDeckUrl={selectedStartup.pitchDeckUrl}
+              images={selectedStartup.images}
+              startupName={selectedStartup.name}
+              isEditable
+              onEditClick={handleOpenEditModal}
+            />
+          </div>
+
           {/* 8-Department Sprint Workspace Grid (if sprint active or completed) */}
           {(selectedStartup.stage === 'sprint_active' || selectedStartup.stage === 'sprint_completed' || selectedStartup.stage === 'funded') && (
-            <div className="glass-panel p-6 border border-white/10 space-y-4">
+            <div id="sprints" className="glass-panel p-6 border border-white/10 space-y-4">
               <div className="flex items-center justify-between">
                 <div>
                   <h3 className="text-base font-bold text-white flex items-center gap-2">
@@ -930,7 +970,7 @@ function FounderDashboardContent() {
           </div>
 
           {/* Founder Control Center & Governance Panel */}
-          <div className="glass-panel p-6 border border-white/10 space-y-6">
+          <div id="governance" className="glass-panel p-6 border border-white/10 space-y-6">
             <div className="flex items-center justify-between border-b border-white/10 pb-4">
               <div>
                 <h3 className="text-base font-bold text-white flex items-center gap-2">
@@ -1410,6 +1450,58 @@ function FounderDashboardContent() {
               placeholder="Interviews, prototype signals, waitlist metrics, or LOIs (minimum 20 characters)..."
               className={`w-full glass-input p-2.5 text-xs text-white ${editValidation.length < 20 ? 'border-amber-500/50' : 'border-emerald-500/40'}`}
             />
+          </div>
+
+          {/* Pitch Video (YouTube) */}
+          <div className="p-3 rounded-xl bg-purple-500/5 border border-purple-500/20 space-y-1.5">
+            <div className="flex items-center justify-between">
+              <label className="text-xs font-semibold text-purple-300">YouTube Pitch Video URL</label>
+              {getYouTubeEmbedUrl(editPitchVideoUrl) && (
+                <span className="text-[10px] text-emerald-400 font-semibold font-mono">
+                  ✓ Valid YouTube Link
+                </span>
+              )}
+            </div>
+            <input
+              type="url"
+              value={editPitchVideoUrl}
+              onChange={(e) => setEditPitchVideoUrl(e.target.value)}
+              placeholder="https://www.youtube.com/watch?v=... or https://youtu.be/..."
+              className="w-full glass-input px-3 py-1.5 text-xs text-white"
+            />
+            <span className="text-[10px] text-slate-400 block">
+              Plays directly inside FoundersHub without redirecting investors away.
+            </span>
+          </div>
+
+          {/* Presentation / PPT Deck URL */}
+          <div className="p-3 rounded-xl bg-indigo-500/5 border border-indigo-500/20 space-y-1.5">
+            <label className="block text-xs font-semibold text-indigo-300">Pitch Deck / PPT Presentation URL</label>
+            <input
+              type="url"
+              value={editPitchDeckUrl}
+              onChange={(e) => setEditPitchDeckUrl(e.target.value)}
+              placeholder="Google Slides link, Pitch.com, or PDF slide deck link"
+              className="w-full glass-input px-3 py-1.5 text-xs text-white"
+            />
+            <span className="text-[10px] text-slate-400 block">
+              Google Slides presentations will embed automatically as an interactive slide viewer.
+            </span>
+          </div>
+
+          {/* Product Screenshots & Architecture */}
+          <div className="p-3 rounded-xl bg-sky-500/5 border border-sky-500/20 space-y-1.5">
+            <label className="block text-xs font-semibold text-sky-300">Product Screenshots & Diagrams (URLs)</label>
+            <textarea
+              rows={2}
+              value={editImages}
+              onChange={(e) => setEditImages(e.target.value)}
+              placeholder="Paste image URLs (one per line)..."
+              className="w-full glass-input p-2 text-xs text-white"
+            />
+            <span className="text-[10px] text-slate-400 block">
+              High-resolution UI designs, Figma mockups, or system architecture diagrams.
+            </span>
           </div>
 
           <div className="grid grid-cols-2 gap-3 p-3 rounded-xl bg-black/40 border border-white/5">

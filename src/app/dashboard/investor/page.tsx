@@ -13,7 +13,9 @@ import {
   ArrowRight,
   ExternalLink,
   Layers,
-  CreditCard
+  CreditCard,
+  Video,
+  Presentation
 } from 'lucide-react';
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip } from 'recharts';
 import { Button } from '@/components/ui/Button';
@@ -21,6 +23,7 @@ import { Badge } from '@/components/ui/Badge';
 import { Modal } from '@/components/ui/Modal';
 import { useAuth } from '@/components/auth/AuthContext';
 import { openRazorpayCheckout } from '@/lib/razorpay-client';
+import { PitchMediaViewer } from '@/components/media/PitchMediaViewer';
 import { StartupDoc, FundingRequestDoc } from '@/types';
 
 export default function InvestorDashboardPage() {
@@ -28,6 +31,7 @@ export default function InvestorDashboardPage() {
   const [completedStartups, setCompletedStartups] = useState<StartupDoc[]>([]);
   const [myInvestments, setMyInvestments] = useState<FundingRequestDoc[]>([]);
   const [loading, setLoading] = useState(true);
+  const [previewMediaStartup, setPreviewMediaStartup] = useState<StartupDoc | null>(null);
 
   // Commit Modal
   const [commitModalOpen, setCommitModalOpen] = useState(false);
@@ -303,6 +307,17 @@ export default function InvestorDashboardPage() {
                     <div className="flex items-center justify-between pt-2 border-t border-white/5">
                       <span className="text-xs text-slate-400">Founder: <b className="text-white">{st.founderName}</b></span>
                       <div className="flex items-center gap-2">
+                        {(st.pitchVideoUrl || st.pitchDeckUrl || (st.images && st.images.length > 0)) && (
+                          <Button
+                            variant="secondary"
+                            size="sm"
+                            onClick={() => setPreviewMediaStartup(st)}
+                            className="text-purple-300 border-purple-500/30 hover:bg-purple-500/10 flex items-center gap-1.5"
+                          >
+                            <Video className="w-3.5 h-3.5" />
+                            <span>Pitch & Deck</span>
+                          </Button>
+                        )}
                         <a href={`/startups/${st._id}`}>
                           <Button variant="ghost" size="sm">Inspect Deliverables</Button>
                         </a>
@@ -324,7 +339,7 @@ export default function InvestorDashboardPage() {
           </div>
 
           {/* Investment & Sponsorship Transaction History */}
-          <div className="glass-panel p-6 border border-white/10 space-y-4">
+          <div id="portfolio" className="glass-panel p-6 border border-white/10 space-y-4">
             <h3 className="text-base font-bold text-white flex items-center gap-2">
               <Clock className="w-4 h-4 text-purple-400" />
               <span>Investment & Branding Partner Ledger</span>
@@ -517,6 +532,19 @@ export default function InvestorDashboardPage() {
               </div>
             )}
 
+            {targetStartup && (targetStartup.pitchVideoUrl || targetStartup.pitchDeckUrl || (targetStartup.images && targetStartup.images.length > 0)) && (
+              <div className="p-2.5 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-between text-xs">
+                <span className="text-purple-300">Review pitch video & slide deck before committing:</span>
+                <button
+                  type="button"
+                  onClick={() => setPreviewMediaStartup(targetStartup)}
+                  className="text-xs font-semibold text-white underline hover:text-purple-200 cursor-pointer"
+                >
+                  Open Pitch Assets →
+                </button>
+              </div>
+            )}
+
             <div className="flex justify-end gap-2 pt-2">
               <Button type="button" variant="ghost" onClick={() => setCommitModalOpen(false)}>Cancel</Button>
               {!fallbackPaymentInfo && (
@@ -526,6 +554,23 @@ export default function InvestorDashboardPage() {
               )}
             </div>
           </form>
+        )}
+      </Modal>
+
+      {/* Modal: View Pitch Assets & Deck */}
+      <Modal
+        isOpen={Boolean(previewMediaStartup)}
+        onClose={() => setPreviewMediaStartup(null)}
+        title={`${previewMediaStartup?.name || 'Venture'} — Pitch Assets & Presentation Deck`}
+        subtitle="Review the founder's YouTube video pitch, interactive presentation slides, and product images."
+      >
+        {previewMediaStartup && (
+          <PitchMediaViewer
+            pitchVideoUrl={previewMediaStartup.pitchVideoUrl}
+            pitchDeckUrl={previewMediaStartup.pitchDeckUrl}
+            images={previewMediaStartup.images}
+            startupName={previewMediaStartup.name}
+          />
         )}
       </Modal>
 
