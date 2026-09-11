@@ -1,0 +1,1204 @@
+{
+  "users": [
+    {
+      "_id": "usr_founder_alex",
+      "name": "Alex Rivera",
+      "email": "founder@founderhub.com",
+      "passwordHash": "$2b$10$Ia/xYQD86loJ/LYzyUaQkOiEIcZVCp.AUBRcTuNmmSH4I.wXqmHha",
+      "role": "founder",
+      "bio": "Serial builder, 2x founder, AI product architect. Passionate about high-velocity execution.",
+      "photoUrl": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80",
+      "theme": "dark",
+      "identityVerificationStatus": "verified",
+      "identityDetails": {
+        "idType": "pan",
+        "idLast4": "8821",
+        "documentName": "PAN_Alex_Rivera.pdf",
+        "attestedAt": "2026-08-15T10:00:00Z"
+      },
+      "createdAt": "2026-08-10T10:00:00Z"
+    },
+    {
+      "_id": "usr_dev_priya",
+      "name": "Priya Sharma",
+      "email": "developer@founderhub.com",
+      "passwordHash": "$2b$10$Ia/xYQD86loJ/LYzyUaQkOiEIcZVCp.AUBRcTuNmmSH4I.wXqmHha",
+      "role": "developer",
+      "bio": "Senior Full-Stack & Distributed Systems Engineer. Open source contributor.",
+      "skills": [
+        "Next.js",
+        "TypeScript",
+        "Node.js",
+        "Go",
+        "Tailwind CSS",
+        "PostgreSQL",
+        "Docker"
+      ],
+      "photoUrl": "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150&auto=format&fit=crop&q=80",
+      "theme": "dark",
+      "identityVerificationStatus": "verified",
+      "identityDetails": {
+        "idType": "aadhaar",
+        "idLast4": "4190",
+        "documentName": "Aadhaar_Priya_Sharma.pdf",
+        "attestedAt": "2026-08-18T14:30:00Z"
+      },
+      "totalPoints": 210,
+      "createdAt": "2026-08-12T11:00:00Z"
+    },
+    {
+      "_id": "usr_dev_marcus",
+      "name": "Marcus Vance",
+      "email": "marcus@builder.dev",
+      "passwordHash": "$2b$10$Ia/xYQD86loJ/LYzyUaQkOiEIcZVCp.AUBRcTuNmmSH4I.wXqmHha",
+      "role": "developer",
+      "bio": "Lead Product & UI/UX Designer. Focusing on interactive micro-animations and intuitive workflows.",
+      "skills": [
+        "Figma",
+        "UI/UX Design",
+        "Design Systems",
+        "CSS/Tailwind",
+        "Prototyping"
+      ],
+      "photoUrl": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80",
+      "theme": "dark",
+      "identityVerificationStatus": "self_attested",
+      "totalPoints": 130,
+      "createdAt": "2026-08-14T09:00:00Z"
+    },
+    {
+      "_id": "usr_investor_vikram",
+      "name": "Vikram Mehta",
+      "email": "investor@founderhub.com",
+      "passwordHash": "$2b$10$Ia/xYQD86loJ/LYzyUaQkOiEIcZVCp.AUBRcTuNmmSH4I.wXqmHha",
+      "role": "investor",
+      "bio": "Managing Partner at Peak Horizon Ventures. Writing $50k-$500k cheques for proof-backed execution teams.",
+      "sectorsOfInterest": [
+        "AI / ML",
+        "DevTools",
+        "Fintech",
+        "HealthTech",
+        "CleanTech"
+      ],
+      "photoUrl": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&auto=format&fit=crop&q=80",
+      "theme": "light",
+      "identityVerificationStatus": "verified",
+      "createdAt": "2026-08-15T12:00:00Z"
+    },
+    {
+      "_id": "usr_founder_alex",
+      "name": "Alex Rivera",
+      "email": "alex@founder.io",
+      "passwordHash": "$2b$10$nWtJSrn.pgqq9tZMpkdBEuUNouDdzLnVvp1AHNAE5njAwKCK20YOa",
+      "role": "founder",
+      "bio": "Serial builder, 2x founder, AI product architect. Passionate about high-velocity execution.",
+      "photoUrl": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80",
+      "theme": "dark",
+      "identityVerificationStatus": "verified",
+      "identityDetails": {
+        "idType": "pan",
+        "idLast4": "8821",
+        "documentName": "PAN_Alex_Rivera.pdf",
+        "attestedAt": "2026-08-15T10:00:00Z"
+      },
+      "createdAt": "2026-08-10T10:00:00Z"
+    },
+    {
+      "_id": "usr_dev_priya",
+      "name": "Priya Sharma",
+      "email": "priya@builder.dev",
+      "passwordHash": "$2b$10$nWtJSrn.pgqq9tZMpkdBEuUNouDdzLnVvp1AHNAE5njAwKCK20YOa",
+      "role": "developer",
+      "bio": "Senior Full-Stack & Distributed Systems Engineer. Open source contributor.",
+      "skills": [
+        "Next.js",
+        "TypeScript",
+        "Node.js",
+        "Go",
+        "Tailwind CSS",
+        "PostgreSQL",
+        "Docker"
+      ],
+      "photoUrl": "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150&auto=format&fit=crop&q=80",
+      "theme": "dark",
+      "identityVerificationStatus": "verified",
+      "identityDetails": {
+        "idType": "aadhaar",
+        "idLast4": "4190",
+        "documentName": "Aadhaar_Priya_Sharma.pdf",
+        "attestedAt": "2026-08-18T14:30:00Z"
+      },
+      "totalPoints": 210,
+      "createdAt": "2026-08-12T11:00:00Z"
+    },
+    {
+      "_id": "usr_dev_marcus",
+      "name": "Marcus Vance",
+      "email": "marcus@builder.dev",
+      "passwordHash": "$2b$10$nWtJSrn.pgqq9tZMpkdBEuUNouDdzLnVvp1AHNAE5njAwKCK20YOa",
+      "role": "developer",
+      "bio": "Lead Product & UI/UX Designer. Focusing on interactive micro-animations and intuitive workflows.",
+      "skills": [
+        "Figma",
+        "UI/UX Design",
+        "Design Systems",
+        "CSS/Tailwind",
+        "Prototyping"
+      ],
+      "photoUrl": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80",
+      "theme": "dark",
+      "identityVerificationStatus": "self_attested",
+      "totalPoints": 130,
+      "createdAt": "2026-08-14T09:00:00Z"
+    },
+    {
+      "_id": "usr_investor_vikram",
+      "name": "Vikram Mehta",
+      "email": "vikram@capital.vc",
+      "passwordHash": "$2b$10$nWtJSrn.pgqq9tZMpkdBEuUNouDdzLnVvp1AHNAE5njAwKCK20YOa",
+      "role": "investor",
+      "bio": "Managing Partner at Peak Horizon Ventures. Writing $50k-$500k cheques for proof-backed execution teams.",
+      "sectorsOfInterest": [
+        "AI / ML",
+        "DevTools",
+        "Fintech",
+        "HealthTech",
+        "CleanTech"
+      ],
+      "photoUrl": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&auto=format&fit=crop&q=80",
+      "theme": "dark",
+      "identityVerificationStatus": "verified",
+      "createdAt": "2026-08-15T12:00:00Z"
+    }
+  ],
+  "startups": [
+    {
+      "_id": "stp_kubescale",
+      "founderId": "usr_founder_alex",
+      "founderName": "Alex Rivera",
+      "name": "KubeScale AI",
+      "tagline": "Autonomous Kubernetes cluster optimization & dynamic cloud cost reduction",
+      "description": "KubeScale deploys low-overhead eBPF probes inside Kubernetes clusters to observe real-time CPU/memory utilization and right-sizes pods dynamically without causing throttling or cold starts.",
+      "problemStatement": "Modern cloud teams waste 35-50% of their AWS/GCP bill on over-provisioned idle Kubernetes compute because manual HPA thresholds are fragile and terrifying to tweak.",
+      "validationEvidence": "3 pilot LOIs signed with mid-market DevOps teams; preliminary benchmarks showed a 42% cost reduction in simulated workloads; 48 developer survey responses validate pain point.",
+      "sector": "DevTools & Cloud Infrastructure",
+      "tags": [
+        "Kubernetes",
+        "eBPF",
+        "DevOps",
+        "Cloud Cost",
+        "AI"
+      ],
+      "stage": "sprint_active",
+      "proposedEquitySplit": {
+        "Alex Rivera (Founder)": 60,
+        "Builders Pool": 30,
+        "Advisors": 10
+      },
+      "images": [
+        "https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=800&auto=format&fit=crop&q=80"
+      ],
+      "pitchDeckUrl": "https://files.foundershub.dev/decks/kubescale-deck.pdf",
+      "visibility": "public",
+      "executionScore": 78,
+      "activeSprintId": "spr_kubescale_active",
+      "ownershipHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "ownershipTimestamp": "2026-08-20T10:00:00Z",
+      "createdAt": "2026-08-20T10:00:00Z"
+    },
+    {
+      "_id": "stp_neuroflow",
+      "founderId": "usr_founder_alex",
+      "founderName": "Alex Rivera",
+      "name": "NeuroFlow Health",
+      "tagline": "Ambient clinical documentation & EHR sync for outpatient clinics",
+      "description": "NeuroFlow captures clinical consultations through ambient microphone listening, structures physician notes into standard SOAP formats, and syncs directly with Epic and Cerner.",
+      "problemStatement": "Primary care physicians spend an average of 2.5 hours every evening doing manual EHR data entry (\"pajama time\"), resulting in 63% physician burnout rates.",
+      "validationEvidence": "Conducted 14 in-depth clinical shadowing sessions; 12 independent clinic doctors committed to 30-day trial; IRB exemption approved; HIPAA compliance architecture peer-reviewed.",
+      "sector": "HealthTech & AI",
+      "tags": [
+        "HealthTech",
+        "Ambient AI",
+        "Speech-to-Text",
+        "EHR",
+        "HIPAA"
+      ],
+      "stage": "funded",
+      "proposedEquitySplit": {
+        "Alex Rivera (Founder)": 55,
+        "Priya Sharma (Tech)": 25,
+        "Marcus Vance (Design)": 12,
+        "Advisors": 8
+      },
+      "vestedEquitySplit": {
+        "Alex Rivera (Founder)": 55,
+        "Priya Sharma (Tech)": 25,
+        "Marcus Vance (Design)": 12,
+        "Advisors": 8
+      },
+      "images": [
+        "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=800&auto=format&fit=crop&q=80"
+      ],
+      "visibility": "public",
+      "executionScore": 89,
+      "activeSprintId": "spr_neuroflow_completed",
+      "totalFundedAmount": 750000,
+      "brandingPartnerships": [
+        {
+          "investorId": "usr_investor_vikram",
+          "brandName": "Peak Horizon Ventures",
+          "brandingLogoUrl": "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=100&auto=format&fit=crop&q=80",
+          "sponsorshipDurationDays": 90,
+          "startsAt": "2026-09-01T00:00:00Z",
+          "expiresAt": "2026-11-30T23:59:59Z"
+        }
+      ],
+      "ownershipHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "ownershipTimestamp": "2026-08-01T09:00:00Z",
+      "createdAt": "2026-08-01T09:00:00Z"
+    },
+    {
+      "_id": "stp_greenpulse",
+      "founderId": "usr_founder_alex",
+      "founderName": "Alex Rivera",
+      "name": "GreenPulse Energy",
+      "tagline": "Decentralized micro-grid energy balancing and tokenized P2P trading",
+      "description": "GreenPulse enables residential solar producers to trade surplus kilowatt hours with nearby neighbors over a local microgrid network.",
+      "problemStatement": "Solar homeowners sell excess power back to monopolies at wholesale rates (3c/kWh) while neighbors pay retail (18c/kWh) for the same electrons.",
+      "validationEvidence": "Initial research and neighborhood survey conducted in 2 residential communities.",
+      "sector": "CleanTech & Energy",
+      "tags": [
+        "Solar",
+        "CleanEnergy",
+        "IoT",
+        "P2P"
+      ],
+      "stage": "draft",
+      "proposedEquitySplit": {
+        "Founder": 70,
+        "Pool": 30
+      },
+      "images": [
+        "https://images.unsplash.com/photo-1509391365360-2e959784a276?w=800&auto=format&fit=crop&q=80"
+      ],
+      "visibility": "private",
+      "executionScore": 25,
+      "createdAt": "2026-09-05T14:00:00Z"
+    },
+    {
+      "_id": "stp_kubescale",
+      "founderId": "usr_founder_alex",
+      "founderName": "Alex Rivera",
+      "name": "KubeScale AI",
+      "tagline": "Autonomous Kubernetes cluster optimization & dynamic cloud cost reduction",
+      "description": "KubeScale deploys low-overhead eBPF probes inside Kubernetes clusters to observe real-time CPU/memory utilization and right-sizes pods dynamically without causing throttling or cold starts.",
+      "problemStatement": "Modern cloud teams waste 35-50% of their AWS/GCP bill on over-provisioned idle Kubernetes compute because manual HPA thresholds are fragile and terrifying to tweak.",
+      "validationEvidence": "3 pilot LOIs signed with mid-market DevOps teams; preliminary benchmarks showed a 42% cost reduction in simulated workloads; 48 developer survey responses validate pain point.",
+      "sector": "DevTools & Cloud Infrastructure",
+      "tags": [
+        "Kubernetes",
+        "eBPF",
+        "DevOps",
+        "Cloud Cost",
+        "AI"
+      ],
+      "stage": "sprint_active",
+      "proposedEquitySplit": {
+        "Alex Rivera (Founder)": 60,
+        "Builders Pool": 30,
+        "Advisors": 10
+      },
+      "images": [
+        "https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=800&auto=format&fit=crop&q=80"
+      ],
+      "pitchDeckUrl": "https://files.foundershub.dev/decks/kubescale-deck.pdf",
+      "visibility": "public",
+      "executionScore": 78,
+      "activeSprintId": "spr_kubescale_active",
+      "ownershipHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "ownershipTimestamp": "2026-08-20T10:00:00Z",
+      "createdAt": "2026-08-20T10:00:00Z"
+    },
+    {
+      "_id": "stp_neuroflow",
+      "founderId": "usr_founder_alex",
+      "founderName": "Alex Rivera",
+      "name": "NeuroFlow Health",
+      "tagline": "Ambient clinical documentation & EHR sync for outpatient clinics",
+      "description": "NeuroFlow captures clinical consultations through ambient microphone listening, structures physician notes into standard SOAP formats, and syncs directly with Epic and Cerner.",
+      "problemStatement": "Primary care physicians spend an average of 2.5 hours every evening doing manual EHR data entry (\"pajama time\"), resulting in 63% physician burnout rates.",
+      "validationEvidence": "Conducted 14 in-depth clinical shadowing sessions; 12 independent clinic doctors committed to 30-day trial; IRB exemption approved; HIPAA compliance architecture peer-reviewed.",
+      "sector": "HealthTech & AI",
+      "tags": [
+        "HealthTech",
+        "Ambient AI",
+        "Speech-to-Text",
+        "EHR",
+        "HIPAA"
+      ],
+      "stage": "sprint_completed",
+      "proposedEquitySplit": {
+        "Alex Rivera (Founder)": 55,
+        "Priya Sharma (Tech)": 25,
+        "Marcus Vance (Design)": 12,
+        "Advisors": 8
+      },
+      "vestedEquitySplit": {
+        "Alex Rivera (Founder)": 55,
+        "Priya Sharma (Tech)": 25,
+        "Marcus Vance (Design)": 12,
+        "Advisors": 8
+      },
+      "images": [
+        "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=800&auto=format&fit=crop&q=80"
+      ],
+      "visibility": "public",
+      "executionScore": 89,
+      "activeSprintId": "spr_neuroflow_completed",
+      "totalFundedAmount": 250000,
+      "brandingPartnerships": [
+        {
+          "investorId": "usr_investor_vikram",
+          "brandName": "Peak Horizon Ventures",
+          "brandingLogoUrl": "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=100&auto=format&fit=crop&q=80",
+          "sponsorshipDurationDays": 90,
+          "startsAt": "2026-09-01T00:00:00Z",
+          "expiresAt": "2026-11-30T23:59:59Z"
+        }
+      ],
+      "ownershipHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "ownershipTimestamp": "2026-08-01T09:00:00Z",
+      "createdAt": "2026-08-01T09:00:00Z"
+    },
+    {
+      "_id": "stp_greenpulse",
+      "founderId": "usr_founder_alex",
+      "founderName": "Alex Rivera",
+      "name": "GreenPulse Energy",
+      "tagline": "Decentralized micro-grid energy balancing and tokenized P2P trading",
+      "description": "GreenPulse enables residential solar producers to trade surplus kilowatt hours with nearby neighbors over a local microgrid network.",
+      "problemStatement": "Solar homeowners sell excess power back to monopolies at wholesale rates (3c/kWh) while neighbors pay retail (18c/kWh) for the same electrons.",
+      "validationEvidence": "Initial research and neighborhood survey conducted in 2 residential communities.",
+      "sector": "CleanTech & Energy",
+      "tags": [
+        "Solar",
+        "CleanEnergy",
+        "IoT",
+        "P2P"
+      ],
+      "stage": "draft",
+      "proposedEquitySplit": {
+        "Founder": 70,
+        "Pool": 30
+      },
+      "images": [
+        "https://images.unsplash.com/photo-1509391365360-2e959784a276?w=800&auto=format&fit=crop&q=80"
+      ],
+      "visibility": "private",
+      "executionScore": 25,
+      "createdAt": "2026-09-05T14:00:00Z"
+    }
+  ],
+  "sprints": [
+    {
+      "_id": "spr_kubescale_active",
+      "startupId": "stp_kubescale",
+      "durationDays": 21,
+      "startDate": "2026-09-01T00:00:00Z",
+      "endDate": "2026-09-22T23:59:59Z",
+      "status": "active",
+      "founderCommitment": {
+        "type": "hours",
+        "value": 30
+      },
+      "lastActivityAt": "2026-09-11T18:00:00Z",
+      "executionScore": 78
+    },
+    {
+      "_id": "spr_neuroflow_completed",
+      "startupId": "stp_neuroflow",
+      "durationDays": 30,
+      "startDate": "2026-08-05T00:00:00Z",
+      "endDate": "2026-09-04T23:59:59Z",
+      "status": "completed",
+      "founderCommitment": {
+        "type": "deposit",
+        "value": 50000
+      },
+      "lastActivityAt": "2026-09-04T22:00:00Z",
+      "executionScore": 89
+    },
+    {
+      "_id": "spr_kubescale_active",
+      "startupId": "stp_kubescale",
+      "durationDays": 21,
+      "startDate": "2026-09-01T00:00:00Z",
+      "endDate": "2026-09-22T23:59:59Z",
+      "status": "active",
+      "founderCommitment": {
+        "type": "hours",
+        "value": 30
+      },
+      "lastActivityAt": "2026-09-11T18:00:00Z",
+      "executionScore": 78
+    },
+    {
+      "_id": "spr_neuroflow_completed",
+      "startupId": "stp_neuroflow",
+      "durationDays": 30,
+      "startDate": "2026-08-05T00:00:00Z",
+      "endDate": "2026-09-04T23:59:59Z",
+      "status": "completed",
+      "founderCommitment": {
+        "type": "deposit",
+        "value": 50000
+      },
+      "lastActivityAt": "2026-09-04T22:00:00Z",
+      "executionScore": 89
+    }
+  ],
+  "departments": [
+    {
+      "_id": "dept_stp_kubescale_development",
+      "startupId": "stp_kubescale",
+      "sprintId": "spr_kubescale_active",
+      "name": "Development",
+      "memberIds": [
+        "usr_founder_alex",
+        "usr_dev_priya"
+      ],
+      "description": "Development department for KubeScale AI execution sprint."
+    },
+    {
+      "_id": "dept_stp_kubescale_marketing",
+      "startupId": "stp_kubescale",
+      "sprintId": "spr_kubescale_active",
+      "name": "Marketing",
+      "memberIds": [
+        "usr_founder_alex"
+      ],
+      "description": "Marketing department for KubeScale AI execution sprint."
+    },
+    {
+      "_id": "dept_stp_kubescale_design__ui_ux_",
+      "startupId": "stp_kubescale",
+      "sprintId": "spr_kubescale_active",
+      "name": "Design (UI/UX)",
+      "memberIds": [
+        "usr_founder_alex",
+        "usr_dev_marcus"
+      ],
+      "description": "Design (UI/UX) department for KubeScale AI execution sprint."
+    },
+    {
+      "_id": "dept_stp_kubescale_product_management",
+      "startupId": "stp_kubescale",
+      "sprintId": "spr_kubescale_active",
+      "name": "Product/Management",
+      "memberIds": [
+        "usr_founder_alex"
+      ],
+      "description": "Product/Management department for KubeScale AI execution sprint."
+    },
+    {
+      "_id": "dept_stp_kubescale_sales",
+      "startupId": "stp_kubescale",
+      "sprintId": "spr_kubescale_active",
+      "name": "Sales",
+      "memberIds": [
+        "usr_founder_alex"
+      ],
+      "description": "Sales department for KubeScale AI execution sprint."
+    },
+    {
+      "_id": "dept_stp_kubescale_customer_support",
+      "startupId": "stp_kubescale",
+      "sprintId": "spr_kubescale_active",
+      "name": "Customer Support",
+      "memberIds": [
+        "usr_founder_alex"
+      ],
+      "description": "Customer Support department for KubeScale AI execution sprint."
+    },
+    {
+      "_id": "dept_stp_kubescale_operations",
+      "startupId": "stp_kubescale",
+      "sprintId": "spr_kubescale_active",
+      "name": "Operations",
+      "memberIds": [
+        "usr_founder_alex"
+      ],
+      "description": "Operations department for KubeScale AI execution sprint."
+    },
+    {
+      "_id": "dept_stp_kubescale_finance",
+      "startupId": "stp_kubescale",
+      "sprintId": "spr_kubescale_active",
+      "name": "Finance",
+      "memberIds": [
+        "usr_founder_alex"
+      ],
+      "description": "Finance department for KubeScale AI execution sprint."
+    },
+    {
+      "_id": "dept_stp_neuroflow_development",
+      "startupId": "stp_neuroflow",
+      "sprintId": "spr_neuroflow_completed",
+      "name": "Development",
+      "memberIds": [
+        "usr_founder_alex",
+        "usr_dev_priya",
+        "usr_dev_marcus"
+      ],
+      "description": "Development department for NeuroFlow Health."
+    },
+    {
+      "_id": "dept_stp_neuroflow_marketing",
+      "startupId": "stp_neuroflow",
+      "sprintId": "spr_neuroflow_completed",
+      "name": "Marketing",
+      "memberIds": [
+        "usr_founder_alex",
+        "usr_dev_priya",
+        "usr_dev_marcus"
+      ],
+      "description": "Marketing department for NeuroFlow Health."
+    },
+    {
+      "_id": "dept_stp_neuroflow_design__ui_ux_",
+      "startupId": "stp_neuroflow",
+      "sprintId": "spr_neuroflow_completed",
+      "name": "Design (UI/UX)",
+      "memberIds": [
+        "usr_founder_alex",
+        "usr_dev_priya",
+        "usr_dev_marcus"
+      ],
+      "description": "Design (UI/UX) department for NeuroFlow Health."
+    },
+    {
+      "_id": "dept_stp_neuroflow_product_management",
+      "startupId": "stp_neuroflow",
+      "sprintId": "spr_neuroflow_completed",
+      "name": "Product/Management",
+      "memberIds": [
+        "usr_founder_alex",
+        "usr_dev_priya",
+        "usr_dev_marcus"
+      ],
+      "description": "Product/Management department for NeuroFlow Health."
+    },
+    {
+      "_id": "dept_stp_neuroflow_sales",
+      "startupId": "stp_neuroflow",
+      "sprintId": "spr_neuroflow_completed",
+      "name": "Sales",
+      "memberIds": [
+        "usr_founder_alex",
+        "usr_dev_priya",
+        "usr_dev_marcus"
+      ],
+      "description": "Sales department for NeuroFlow Health."
+    },
+    {
+      "_id": "dept_stp_neuroflow_customer_support",
+      "startupId": "stp_neuroflow",
+      "sprintId": "spr_neuroflow_completed",
+      "name": "Customer Support",
+      "memberIds": [
+        "usr_founder_alex",
+        "usr_dev_priya",
+        "usr_dev_marcus"
+      ],
+      "description": "Customer Support department for NeuroFlow Health."
+    },
+    {
+      "_id": "dept_stp_neuroflow_operations",
+      "startupId": "stp_neuroflow",
+      "sprintId": "spr_neuroflow_completed",
+      "name": "Operations",
+      "memberIds": [
+        "usr_founder_alex",
+        "usr_dev_priya",
+        "usr_dev_marcus"
+      ],
+      "description": "Operations department for NeuroFlow Health."
+    },
+    {
+      "_id": "dept_stp_neuroflow_finance",
+      "startupId": "stp_neuroflow",
+      "sprintId": "spr_neuroflow_completed",
+      "name": "Finance",
+      "memberIds": [
+        "usr_founder_alex",
+        "usr_dev_priya",
+        "usr_dev_marcus"
+      ],
+      "description": "Finance department for NeuroFlow Health."
+    },
+    {
+      "_id": "dept_stp_kubescale_development",
+      "startupId": "stp_kubescale",
+      "sprintId": "spr_kubescale_active",
+      "name": "Development",
+      "memberIds": [
+        "usr_founder_alex",
+        "usr_dev_priya"
+      ],
+      "description": "Development department for KubeScale AI execution sprint."
+    },
+    {
+      "_id": "dept_stp_kubescale_marketing",
+      "startupId": "stp_kubescale",
+      "sprintId": "spr_kubescale_active",
+      "name": "Marketing",
+      "memberIds": [
+        "usr_founder_alex"
+      ],
+      "description": "Marketing department for KubeScale AI execution sprint."
+    },
+    {
+      "_id": "dept_stp_kubescale_design__ui_ux_",
+      "startupId": "stp_kubescale",
+      "sprintId": "spr_kubescale_active",
+      "name": "Design (UI/UX)",
+      "memberIds": [
+        "usr_founder_alex",
+        "usr_dev_marcus"
+      ],
+      "description": "Design (UI/UX) department for KubeScale AI execution sprint."
+    },
+    {
+      "_id": "dept_stp_kubescale_product_management",
+      "startupId": "stp_kubescale",
+      "sprintId": "spr_kubescale_active",
+      "name": "Product/Management",
+      "memberIds": [
+        "usr_founder_alex"
+      ],
+      "description": "Product/Management department for KubeScale AI execution sprint."
+    },
+    {
+      "_id": "dept_stp_kubescale_sales",
+      "startupId": "stp_kubescale",
+      "sprintId": "spr_kubescale_active",
+      "name": "Sales",
+      "memberIds": [
+        "usr_founder_alex"
+      ],
+      "description": "Sales department for KubeScale AI execution sprint."
+    },
+    {
+      "_id": "dept_stp_kubescale_customer_support",
+      "startupId": "stp_kubescale",
+      "sprintId": "spr_kubescale_active",
+      "name": "Customer Support",
+      "memberIds": [
+        "usr_founder_alex"
+      ],
+      "description": "Customer Support department for KubeScale AI execution sprint."
+    },
+    {
+      "_id": "dept_stp_kubescale_operations",
+      "startupId": "stp_kubescale",
+      "sprintId": "spr_kubescale_active",
+      "name": "Operations",
+      "memberIds": [
+        "usr_founder_alex"
+      ],
+      "description": "Operations department for KubeScale AI execution sprint."
+    },
+    {
+      "_id": "dept_stp_kubescale_finance",
+      "startupId": "stp_kubescale",
+      "sprintId": "spr_kubescale_active",
+      "name": "Finance",
+      "memberIds": [
+        "usr_founder_alex"
+      ],
+      "description": "Finance department for KubeScale AI execution sprint."
+    },
+    {
+      "_id": "dept_stp_neuroflow_development",
+      "startupId": "stp_neuroflow",
+      "sprintId": "spr_neuroflow_completed",
+      "name": "Development",
+      "memberIds": [
+        "usr_founder_alex",
+        "usr_dev_priya",
+        "usr_dev_marcus"
+      ],
+      "description": "Development department for NeuroFlow Health."
+    },
+    {
+      "_id": "dept_stp_neuroflow_marketing",
+      "startupId": "stp_neuroflow",
+      "sprintId": "spr_neuroflow_completed",
+      "name": "Marketing",
+      "memberIds": [
+        "usr_founder_alex",
+        "usr_dev_priya",
+        "usr_dev_marcus"
+      ],
+      "description": "Marketing department for NeuroFlow Health."
+    },
+    {
+      "_id": "dept_stp_neuroflow_design__ui_ux_",
+      "startupId": "stp_neuroflow",
+      "sprintId": "spr_neuroflow_completed",
+      "name": "Design (UI/UX)",
+      "memberIds": [
+        "usr_founder_alex",
+        "usr_dev_priya",
+        "usr_dev_marcus"
+      ],
+      "description": "Design (UI/UX) department for NeuroFlow Health."
+    },
+    {
+      "_id": "dept_stp_neuroflow_product_management",
+      "startupId": "stp_neuroflow",
+      "sprintId": "spr_neuroflow_completed",
+      "name": "Product/Management",
+      "memberIds": [
+        "usr_founder_alex",
+        "usr_dev_priya",
+        "usr_dev_marcus"
+      ],
+      "description": "Product/Management department for NeuroFlow Health."
+    },
+    {
+      "_id": "dept_stp_neuroflow_sales",
+      "startupId": "stp_neuroflow",
+      "sprintId": "spr_neuroflow_completed",
+      "name": "Sales",
+      "memberIds": [
+        "usr_founder_alex",
+        "usr_dev_priya",
+        "usr_dev_marcus"
+      ],
+      "description": "Sales department for NeuroFlow Health."
+    },
+    {
+      "_id": "dept_stp_neuroflow_customer_support",
+      "startupId": "stp_neuroflow",
+      "sprintId": "spr_neuroflow_completed",
+      "name": "Customer Support",
+      "memberIds": [
+        "usr_founder_alex",
+        "usr_dev_priya",
+        "usr_dev_marcus"
+      ],
+      "description": "Customer Support department for NeuroFlow Health."
+    },
+    {
+      "_id": "dept_stp_neuroflow_operations",
+      "startupId": "stp_neuroflow",
+      "sprintId": "spr_neuroflow_completed",
+      "name": "Operations",
+      "memberIds": [
+        "usr_founder_alex",
+        "usr_dev_priya",
+        "usr_dev_marcus"
+      ],
+      "description": "Operations department for NeuroFlow Health."
+    },
+    {
+      "_id": "dept_stp_neuroflow_finance",
+      "startupId": "stp_neuroflow",
+      "sprintId": "spr_neuroflow_completed",
+      "name": "Finance",
+      "memberIds": [
+        "usr_founder_alex",
+        "usr_dev_priya",
+        "usr_dev_marcus"
+      ],
+      "description": "Finance department for NeuroFlow Health."
+    }
+  ],
+  "tasks": [
+    {
+      "_id": "tsk_k8s_1",
+      "departmentId": "dept_stp_kubescale_development",
+      "startupId": "stp_kubescale",
+      "title": "Build eBPF kernel event listener daemonset",
+      "description": "Implement BCC/Cilium-based eBPF tracepoints for process memory allocations and socket latency spikes.",
+      "assigneeId": "usr_dev_priya",
+      "assigneeName": "Priya Sharma",
+      "priority": "critical",
+      "status": "done",
+      "contributionPoints": 40,
+      "dueDate": "2026-09-08",
+      "completedAt": "2026-09-07T16:00:00Z",
+      "createdAt": "2026-09-01T10:00:00Z"
+    },
+    {
+      "_id": "tsk_k8s_2",
+      "departmentId": "dept_stp_kubescale_development",
+      "startupId": "stp_kubescale",
+      "title": "Implement dynamic pod vertical autoscaler controller",
+      "description": "Create custom CRD controller in Go that recalculates CPU limits and requests every 60 seconds.",
+      "assigneeId": "usr_dev_priya",
+      "assigneeName": "Priya Sharma",
+      "priority": "high",
+      "status": "in_progress",
+      "contributionPoints": 35,
+      "dueDate": "2026-09-15",
+      "createdAt": "2026-09-02T11:00:00Z"
+    },
+    {
+      "_id": "tsk_k8s_3",
+      "departmentId": "dept_stp_kubescale_development",
+      "startupId": "stp_kubescale",
+      "title": "Telemetry stream exporter to Prometheus",
+      "description": "Format real-time CPU throttling and node headroom statistics into open Prometheus metrics endpoint.",
+      "priority": "medium",
+      "status": "backlog",
+      "contributionPoints": 20,
+      "dueDate": "2026-09-18",
+      "createdAt": "2026-09-03T14:00:00Z"
+    },
+    {
+      "_id": "tsk_k8s_4",
+      "departmentId": "dept_stp_kubescale_design__ui_ux_",
+      "startupId": "stp_kubescale",
+      "title": "Design real-time cluster cost telemetry dashboard",
+      "description": "Design dark-mode SaaS UI showing live dollar burn-rate vs optimized savings per namespace.",
+      "assigneeId": "usr_dev_marcus",
+      "assigneeName": "Marcus Vance",
+      "priority": "high",
+      "status": "done",
+      "contributionPoints": 30,
+      "dueDate": "2026-09-09",
+      "completedAt": "2026-09-08T18:00:00Z",
+      "createdAt": "2026-09-01T12:00:00Z"
+    },
+    {
+      "_id": "tsk_k8s_5",
+      "departmentId": "dept_stp_kubescale_design__ui_ux_",
+      "startupId": "stp_kubescale",
+      "title": "Design onboarding flow & Helm chart wizard",
+      "description": "Interactive step-by-step UI for DevOps engineers to paste Helm install commands and verify pod heartbeat.",
+      "assigneeId": "usr_dev_marcus",
+      "assigneeName": "Marcus Vance",
+      "priority": "medium",
+      "status": "review",
+      "contributionPoints": 25,
+      "dueDate": "2026-09-14",
+      "createdAt": "2026-09-04T09:00:00Z"
+    },
+    {
+      "_id": "tsk_k8s_1",
+      "departmentId": "dept_stp_kubescale_development",
+      "startupId": "stp_kubescale",
+      "title": "Build eBPF kernel event listener daemonset",
+      "description": "Implement BCC/Cilium-based eBPF tracepoints for process memory allocations and socket latency spikes.",
+      "assigneeId": "usr_dev_priya",
+      "assigneeName": "Priya Sharma",
+      "priority": "critical",
+      "status": "done",
+      "contributionPoints": 40,
+      "dueDate": "2026-09-08",
+      "completedAt": "2026-09-07T16:00:00Z",
+      "createdAt": "2026-09-01T10:00:00Z"
+    },
+    {
+      "_id": "tsk_k8s_2",
+      "departmentId": "dept_stp_kubescale_development",
+      "startupId": "stp_kubescale",
+      "title": "Implement dynamic pod vertical autoscaler controller",
+      "description": "Create custom CRD controller in Go that recalculates CPU limits and requests every 60 seconds.",
+      "assigneeId": "usr_dev_priya",
+      "assigneeName": "Priya Sharma",
+      "priority": "high",
+      "status": "in_progress",
+      "contributionPoints": 35,
+      "dueDate": "2026-09-15",
+      "createdAt": "2026-09-02T11:00:00Z"
+    },
+    {
+      "_id": "tsk_k8s_3",
+      "departmentId": "dept_stp_kubescale_development",
+      "startupId": "stp_kubescale",
+      "title": "Telemetry stream exporter to Prometheus",
+      "description": "Format real-time CPU throttling and node headroom statistics into open Prometheus metrics endpoint.",
+      "priority": "medium",
+      "status": "backlog",
+      "contributionPoints": 20,
+      "dueDate": "2026-09-18",
+      "createdAt": "2026-09-03T14:00:00Z"
+    },
+    {
+      "_id": "tsk_k8s_4",
+      "departmentId": "dept_stp_kubescale_design__ui_ux_",
+      "startupId": "stp_kubescale",
+      "title": "Design real-time cluster cost telemetry dashboard",
+      "description": "Design dark-mode SaaS UI showing live dollar burn-rate vs optimized savings per namespace.",
+      "assigneeId": "usr_dev_marcus",
+      "assigneeName": "Marcus Vance",
+      "priority": "high",
+      "status": "done",
+      "contributionPoints": 30,
+      "dueDate": "2026-09-09",
+      "completedAt": "2026-09-08T18:00:00Z",
+      "createdAt": "2026-09-01T12:00:00Z"
+    },
+    {
+      "_id": "tsk_k8s_5",
+      "departmentId": "dept_stp_kubescale_design__ui_ux_",
+      "startupId": "stp_kubescale",
+      "title": "Design onboarding flow & Helm chart wizard",
+      "description": "Interactive step-by-step UI for DevOps engineers to paste Helm install commands and verify pod heartbeat.",
+      "assigneeId": "usr_dev_marcus",
+      "assigneeName": "Marcus Vance",
+      "priority": "medium",
+      "status": "review",
+      "contributionPoints": 25,
+      "dueDate": "2026-09-14",
+      "createdAt": "2026-09-04T09:00:00Z"
+    }
+  ],
+  "timeline": [
+    {
+      "_id": "tml_1",
+      "startupId": "stp_kubescale",
+      "eventType": "readiness_gate_passed",
+      "actorId": "usr_founder_alex",
+      "actorName": "Alex Rivera",
+      "details": "Passed readiness gate with verified problem statement and validation LOIs.",
+      "createdAt": "2026-08-31T15:00:00Z"
+    },
+    {
+      "_id": "tml_2",
+      "startupId": "stp_kubescale",
+      "eventType": "sprint_started",
+      "actorId": "usr_founder_alex",
+      "actorName": "Alex Rivera",
+      "details": "Initiated 21-day execution sprint with 30 hrs/wk commitment. 8 departments provisioned.",
+      "createdAt": "2026-09-01T00:00:00Z"
+    },
+    {
+      "_id": "tml_3",
+      "startupId": "stp_kubescale",
+      "departmentId": "dept_stp_kubescale_development",
+      "eventType": "joined",
+      "actorId": "usr_dev_priya",
+      "actorName": "Priya Sharma",
+      "details": "Joined Development department as Lead Systems Engineer.",
+      "createdAt": "2026-09-01T09:30:00Z"
+    },
+    {
+      "_id": "tml_4",
+      "startupId": "stp_kubescale",
+      "departmentId": "dept_stp_kubescale_development",
+      "eventType": "task_committed",
+      "actorId": "usr_dev_priya",
+      "actorName": "Priya Sharma",
+      "details": "Completed task: \"Build eBPF kernel event listener daemonset\" (+40 contribution points).",
+      "createdAt": "2026-09-07T16:00:00Z"
+    },
+    {
+      "_id": "tml_1",
+      "startupId": "stp_kubescale",
+      "eventType": "readiness_gate_passed",
+      "actorId": "usr_founder_alex",
+      "actorName": "Alex Rivera",
+      "details": "Passed readiness gate with verified problem statement and validation LOIs.",
+      "createdAt": "2026-08-31T15:00:00Z"
+    },
+    {
+      "_id": "tml_2",
+      "startupId": "stp_kubescale",
+      "eventType": "sprint_started",
+      "actorId": "usr_founder_alex",
+      "actorName": "Alex Rivera",
+      "details": "Initiated 21-day execution sprint with 30 hrs/wk commitment. 8 departments provisioned.",
+      "createdAt": "2026-09-01T00:00:00Z"
+    },
+    {
+      "_id": "tml_3",
+      "startupId": "stp_kubescale",
+      "departmentId": "dept_stp_kubescale_development",
+      "eventType": "joined",
+      "actorId": "usr_dev_priya",
+      "actorName": "Priya Sharma",
+      "details": "Joined Development department as Lead Systems Engineer.",
+      "createdAt": "2026-09-01T09:30:00Z"
+    },
+    {
+      "_id": "tml_4",
+      "startupId": "stp_kubescale",
+      "departmentId": "dept_stp_kubescale_development",
+      "eventType": "task_committed",
+      "actorId": "usr_dev_priya",
+      "actorName": "Priya Sharma",
+      "details": "Completed task: \"Build eBPF kernel event listener daemonset\" (+40 contribution points).",
+      "createdAt": "2026-09-07T16:00:00Z"
+    },
+    {
+      "_id": "tml_1789148710678",
+      "startupId": "stp_neuroflow",
+      "eventType": "funding_requested",
+      "actorId": "usr_investor_vikram",
+      "actorName": "Vikram Mehta",
+      "details": "Vikram Mehta submitted a ₹500,000 investment commitment (Test Mode).",
+      "createdAt": "2026-09-11T17:45:10.688Z"
+    },
+    {
+      "_id": "tml_1789148718878",
+      "startupId": "stp_neuroflow",
+      "eventType": "funding_accepted",
+      "actorId": "usr_investor_vikram",
+      "actorName": "Vikram Mehta",
+      "details": "Razorpay Test Mode payment completed! Transferred ₹500,000 (Order: order_test_1789148715219_gi1qs).",
+      "createdAt": "2026-09-11T17:45:18.878Z"
+    }
+  ],
+  "expenses": [
+    {
+      "_id": "exp_1",
+      "startupId": "stp_kubescale",
+      "description": "AWS GPU Test Clusters & EKS Control Plane",
+      "amount": 480,
+      "category": "infrastructure",
+      "date": "2026-09-03"
+    },
+    {
+      "_id": "exp_2",
+      "startupId": "stp_kubescale",
+      "description": "Figma Enterprise & Adobe Creative Suite",
+      "amount": 120,
+      "category": "tooling",
+      "date": "2026-09-05"
+    },
+    {
+      "_id": "exp_3",
+      "startupId": "stp_kubescale",
+      "description": "Domain Registration & Cloudflare Pro",
+      "amount": 45,
+      "category": "infrastructure",
+      "date": "2026-09-01"
+    },
+    {
+      "_id": "exp_1",
+      "startupId": "stp_kubescale",
+      "description": "AWS GPU Test Clusters & EKS Control Plane",
+      "amount": 480,
+      "category": "infrastructure",
+      "date": "2026-09-03"
+    },
+    {
+      "_id": "exp_2",
+      "startupId": "stp_kubescale",
+      "description": "Figma Enterprise & Adobe Creative Suite",
+      "amount": 120,
+      "category": "tooling",
+      "date": "2026-09-05"
+    },
+    {
+      "_id": "exp_3",
+      "startupId": "stp_kubescale",
+      "description": "Domain Registration & Cloudflare Pro",
+      "amount": 45,
+      "category": "infrastructure",
+      "date": "2026-09-01"
+    }
+  ],
+  "fundingRequests": [
+    {
+      "_id": "fnd_1",
+      "startupId": "stp_neuroflow",
+      "startupName": "NeuroFlow Health",
+      "investorId": "usr_investor_vikram",
+      "investorName": "Vikram Mehta",
+      "type": "investment",
+      "amount": 250000,
+      "message": "Impressed by the 89 Execution Score and clinical trial completion. Ready to syndicate the seed round.",
+      "contactDetails": "vikram@capital.vc / +91-98200-11223",
+      "agreementAccepted": true,
+      "status": "accepted",
+      "razorpayOrderId": "order_Tapf3EFYQ5sRTd",
+      "razorpayPaymentId": "pay_test_988214_success",
+      "paymentStatus": "created",
+      "platformFeeAmount": 1000,
+      "requestedAt": "2026-09-05T14:00:00Z",
+      "processedAt": "2026-09-06T10:00:00Z"
+    },
+    {
+      "_id": "fnd_1",
+      "startupId": "stp_neuroflow",
+      "startupName": "NeuroFlow Health",
+      "investorId": "usr_investor_vikram",
+      "investorName": "Vikram Mehta",
+      "type": "investment",
+      "amount": 250000,
+      "message": "Impressed by the 89 Execution Score and clinical trial completion. Ready to syndicate the seed round.",
+      "contactDetails": "vikram@capital.vc / +91-98200-11223",
+      "agreementAccepted": true,
+      "status": "accepted",
+      "razorpayOrderId": "order_test_988214",
+      "razorpayPaymentId": "pay_test_988214_success",
+      "paymentStatus": "success",
+      "platformFeeAmount": 2500,
+      "requestedAt": "2026-09-05T14:00:00Z",
+      "processedAt": "2026-09-06T10:00:00Z"
+    },
+    {
+      "_id": "fnd_1789148710677_fbrrs",
+      "startupId": "stp_neuroflow",
+      "startupName": "NeuroFlow Health",
+      "investorId": "usr_investor_vikram",
+      "investorName": "Vikram Mehta",
+      "type": "investment",
+      "amount": 500000,
+      "message": "",
+      "contactDetails": "vikram@capital.vc",
+      "agreementAccepted": true,
+      "status": "completed",
+      "platformFeeAmount": 5000,
+      "requestedAt": "2026-09-11T17:45:10.677Z",
+      "razorpayOrderId": "order_test_1789148715219_gi1qs",
+      "paymentStatus": "success",
+      "razorpayPaymentId": "pay_test_verified_123",
+      "processedAt": "2026-09-11T17:45:18.877Z"
+    }
+  ],
+  "applications": [
+    {
+      "_id": "app_1",
+      "startupId": "stp_kubescale",
+      "startupName": "KubeScale AI",
+      "departmentId": "dept_stp_kubescale_development",
+      "departmentName": "Development",
+      "developerId": "usr_dev_priya",
+      "developerName": "Priya Sharma",
+      "developerEmail": "priya@builder.dev",
+      "coverNote": "Excited about eBPF and runtime observability. Have built similar custom controllers in past roles.",
+      "resumeUrl": "https://files.foundershub.dev/resumes/priya-sharma-resume.pdf",
+      "answers": {
+        "What is your experience with Kubernetes controllers?": "4 years writing custom CRD operators in Go and testing with Kind.",
+        "Weekly hours available?": "20 hours during sprint window."
+      },
+      "status": "accepted",
+      "appliedAt": "2026-09-01T08:00:00Z"
+    },
+    {
+      "_id": "app_1",
+      "startupId": "stp_kubescale",
+      "startupName": "KubeScale AI",
+      "departmentId": "dept_stp_kubescale_development",
+      "departmentName": "Development",
+      "developerId": "usr_dev_priya",
+      "developerName": "Priya Sharma",
+      "developerEmail": "priya@builder.dev",
+      "coverNote": "Excited about eBPF and runtime observability. Have built similar custom controllers in past roles.",
+      "resumeUrl": "https://files.foundershub.dev/resumes/priya-sharma-resume.pdf",
+      "answers": {
+        "What is your experience with Kubernetes controllers?": "4 years writing custom CRD operators in Go and testing with Kind.",
+        "Weekly hours available?": "20 hours during sprint window."
+      },
+      "status": "accepted",
+      "appliedAt": "2026-09-01T08:00:00Z"
+    }
+  ],
+  "files": []
+}
