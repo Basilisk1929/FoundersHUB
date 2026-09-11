@@ -18,7 +18,14 @@ import {
   ShieldCheck,
   Check,
   X,
-  Bot
+  Bot,
+  Edit3,
+  Trash2,
+  Settings2,
+  PauseCircle,
+  PlayCircle,
+  PlusCircle,
+  UserMinus
 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
@@ -48,6 +55,32 @@ function FounderDashboardContent() {
   const [newProblem, setNewProblem] = useState('');
   const [newValidation, setNewValidation] = useState('');
   const [newEquitySplit, setNewEquitySplit] = useState({ 'Founder': 70, 'Builders Pool': 30 });
+
+  // Edit Startup Modal
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [editName, setEditName] = useState('');
+  const [editTagline, setEditTagline] = useState('');
+  const [editSector, setEditSector] = useState('AI / Software');
+  const [editProblem, setEditProblem] = useState('');
+  const [editValidation, setEditValidation] = useState('');
+  const [editFounderEquity, setEditFounderEquity] = useState(70);
+  const [editBuildersEquity, setEditBuildersEquity] = useState(30);
+  const [isUpdating, setIsUpdating] = useState(false);
+
+  // Delete Startup Modal
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  // Founder Control Center State
+  const [isFundingPaused, setIsFundingPaused] = useState(false);
+  const [minTicketSize, setMinTicketSize] = useState('25000');
+  const [taskModalOpen, setTaskModalOpen] = useState(false);
+  const [taskDeptId, setTaskDeptId] = useState('');
+  const [taskTitle, setTaskTitle] = useState('');
+  const [taskDescription, setTaskDescription] = useState('');
+  const [taskPriority, setTaskPriority] = useState<'low' | 'medium' | 'high' | 'critical'>('medium');
+  const [taskPoints, setTaskPoints] = useState(20);
+  const [isSubmittingTask, setIsSubmittingTask] = useState(false);
 
   // Sprint Launcher Modal
   const [sprintModalOpen, setSprintModalOpen] = useState(false);
@@ -91,11 +124,23 @@ function FounderDashboardContent() {
 
   const selectStartup = async (st: StartupDoc) => {
     setSelectedStartup(st);
+    setEditName(st.name || '');
+    setEditTagline(st.tagline || '');
+    setEditSector(st.sector || 'AI / Software');
+    setEditProblem(st.problemStatement || '');
+    setEditValidation(st.validationEvidence || '');
+    setEditFounderEquity(st.proposedEquitySplit?.['Founder'] ?? 70);
+    setEditBuildersEquity(st.proposedEquitySplit?.['Builders Pool'] ?? 30);
+    setIsFundingPaused(Boolean(st.isFundingPaused));
+    setMinTicketSize(String(st.minTicketSize || 25000));
     try {
       const detailRes = await fetch(`/api/startups/${st._id}`);
       const detailData = await detailRes.json();
       setSprint(detailData.sprint || null);
       setDepartments(detailData.departments || []);
+      if (detailData.departments && detailData.departments.length > 0) {
+        setTaskDeptId(detailData.departments[0]._id);
+      }
 
       // Fetch applications
       const appRes = await fetch('/api/applications');
@@ -108,6 +153,177 @@ function FounderDashboardContent() {
       setFundingRequests(fundData.fundingRequests || []);
     } catch (e) {
       console.error(e);
+    }
+  };
+
+  const handleOpenEditModal = () => {
+    if (!selectedStartup) return;
+    setEditName(selectedStartup.name || '');
+    setEditTagline(selectedStartup.tagline || '');
+    setEditSector(selectedStartup.sector || 'AI / Software');
+    setEditProblem(selectedStartup.problemStatement || '');
+    setEditValidation(selectedStartup.validationEvidence || '');
+    setEditFounderEquity(selectedStartup.proposedEquitySplit?.['Founder'] ?? 70);
+    setEditBuildersEquity(selectedStartup.proposedEquitySplit?.['Builders Pool'] ?? 30);
+    setEditModalOpen(true);
+  };
+
+  const handleUpdateStartup = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedStartup) return;
+    setIsUpdating(true);
+    try {
+      const fEq = Number(editFounderEquity);
+      const bEq = Number(editBuildersEquity);
+      const iEq = Math.max(0, 100 - fEq - bEq);
+      const split: Record<string, number> = {
+        'Founder': fEq,
+        'Builders Pool': bEq
+      };
+      if (iEq > 0) split['Investors'] = iEq;
+
+      const res = await fetch(`/api/startups/${selectedStartup._id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: editName,
+          tagline: editTagline,
+          sector: editSector,
+          problemStatement: editProblem,
+          validationEvidence: editValidation,
+          proposedEquitySplit: split
+        })
+      });
+      const data = await res.json();
+      if (res.ok && data.startup) {
+        setSelectedStartup(data.startup);
+        setStartups(prev => prev.map(s => s._id === data.startup._id ? data.startup : s));
+        setEditModalOpen(false);
+
+        // If it now satisfies readiness and was in draft, auto-trigger readiness publish
+        const probOk = Boolean(data.startup.problemStatement && data.startup.problemStatement.length >= 30);
+        const valOk = Boolean(data.startup.validationEvidence && data.startup.validationEvidence.length >= 20);
+        if (probOk && valOk && data.startup.stage === 'draft') {
+          await fetch(`/api/startups/${data.startup._id}/readiness`, { method: 'POST' });
+          const refreshed = await (await fetch(`/api/startups/${data.startup._id}`)).json();
+          if (refreshed.startup) {
+            setSelectedStartup(refreshed.startup);
+            setStartups(prev => prev.map(s => s._id === refreshed.startup._id ? refreshed.startup : s));
+          }
+        }
+      }
+    } catch (e) {
+      console.error('Update idea error:', e);
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
+  const handleDeleteStartup = async () => {
+    if (!selectedStartup) return;
+    setIsDeleting(true);
+    try {
+      const res = await fetch(`/api/startups/${selectedStartup._id}`, {
+        method: 'DELETE'
+      });
+      if (res.ok) {
+        const remaining = startups.filter(s => s._id !== selectedStartup._id);
+        setStartups(remaining);
+        setDeleteModalOpen(false);
+        if (remaining.length > 0) {
+          selectStartup(remaining[0]);
+        } else {
+          setSelectedStartup(null);
+        }
+      }
+    } catch (e) {
+      console.error('Delete idea error:', e);
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  const handleToggleFundingPause = async () => {
+    if (!selectedStartup) return;
+    const nextPaused = !isFundingPaused;
+    try {
+      const res = await fetch(`/api/startups/${selectedStartup._id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          isFundingPaused: nextPaused,
+          minTicketSize: Number(minTicketSize)
+        })
+      });
+      if (res.ok) {
+        setIsFundingPaused(nextPaused);
+        setSelectedStartup(prev => prev ? { ...prev, isFundingPaused: nextPaused, minTicketSize: Number(minTicketSize) } : prev);
+      }
+    } catch (e) {
+      console.error('Toggle funding pause error:', e);
+    }
+  };
+
+  const handleUpdateMinTicket = async () => {
+    if (!selectedStartup) return;
+    try {
+      const res = await fetch(`/api/startups/${selectedStartup._id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          minTicketSize: Number(minTicketSize)
+        })
+      });
+      if (res.ok) {
+        setSelectedStartup(prev => prev ? { ...prev, minTicketSize: Number(minTicketSize) } : prev);
+      }
+    } catch (e) {
+      console.error('Update min ticket error:', e);
+    }
+  };
+
+  const handleInjectTask = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedStartup || !taskDeptId || !taskTitle.trim()) return;
+    setIsSubmittingTask(true);
+    try {
+      const res = await fetch('/api/tasks', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          departmentId: taskDeptId,
+          title: taskTitle.trim(),
+          description: taskDescription.trim(),
+          priority: taskPriority,
+          contributionPoints: Number(taskPoints)
+        })
+      });
+      if (res.ok) {
+        setTaskModalOpen(false);
+        setTaskTitle('');
+        setTaskDescription('');
+        selectStartup(selectedStartup);
+      }
+    } catch (e) {
+      console.error('Inject task error:', e);
+    } finally {
+      setIsSubmittingTask(false);
+    }
+  };
+
+  const handleUnassignBuilder = async (departmentId: string, memberId: string) => {
+    if (!confirm('Unassign this builder from this department?')) return;
+    try {
+      const res = await fetch(`/api/departments/${departmentId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'remove_member', memberId })
+      });
+      if (res.ok && selectedStartup) {
+        selectStartup(selectedStartup);
+      }
+    } catch (e) {
+      console.error('Unassign builder error:', e);
     }
   };
 
@@ -249,7 +465,11 @@ function FounderDashboardContent() {
         body: JSON.stringify({
           startupId: selectedStartup?._id,
           message: q,
-          isWhatNext
+          isWhatNext,
+          history: copilotLogs.slice(-6).map(l => ({
+            role: l.role === 'assistant' ? 'model' : 'user',
+            content: l.text
+          }))
         })
       });
 
@@ -373,9 +593,25 @@ function FounderDashboardContent() {
           {/* Main Status & Controls Header */}
           <div className="glass-panel p-6 border border-white/10 flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div className="space-y-2">
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 flex-wrap">
                 <h2 className="text-2xl font-bold text-white">{selectedStartup.name}</h2>
                 <Badge variant="stage" stage={selectedStartup.stage} />
+                <button
+                  type="button"
+                  onClick={handleOpenEditModal}
+                  className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
+                  title="Edit Idea Details"
+                >
+                  <Edit3 className="w-4 h-4 text-indigo-400" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setDeleteModalOpen(true)}
+                  className="p-1.5 rounded-lg text-slate-400 hover:text-red-400 hover:bg-red-500/10 transition-colors cursor-pointer"
+                  title="Delete Idea"
+                >
+                  <Trash2 className="w-4 h-4 text-red-400" />
+                </button>
               </div>
               <p className="text-xs text-slate-300 max-w-2xl">{selectedStartup.tagline}</p>
               <div className="text-[11px] text-slate-400 flex items-center gap-3 pt-1">
@@ -463,6 +699,38 @@ function FounderDashboardContent() {
                   </span>
                 )}
               </div>
+
+              {/* If readiness gate failed / incomplete, show alert & improve button */}
+              {selectedStartup.stage === 'draft' && !canPublish && (
+                <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/30 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                  <div className="flex items-start gap-3 text-xs text-amber-300">
+                    <AlertTriangle className="w-5 h-5 shrink-0 text-amber-400 mt-0.5" />
+                    <div>
+                      <div className="font-bold text-sm text-white">Idea Incomplete — Readiness Gate Blocked</div>
+                      <div className="text-slate-300 text-[11px] mt-1 space-y-0.5">
+                        {!hasProblem && (
+                          <div>• Problem statement is too short: currently <b>{selectedStartup.problemStatement?.length || 0}</b> characters (minimum 30 required).</div>
+                        )}
+                        {!hasValidation && (
+                          <div>• Validation evidence is too short: currently <b>{selectedStartup.validationEvidence?.length || 0}</b> characters (minimum 20 required).</div>
+                        )}
+                        {!hasEquity && (
+                          <div>• Initial proposed equity split is missing.</div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                  <Button
+                    size="sm"
+                    variant="glow"
+                    onClick={handleOpenEditModal}
+                    className="whitespace-nowrap flex items-center gap-1.5 shrink-0 cursor-pointer"
+                  >
+                    <Edit3 className="w-4 h-4" />
+                    <span>Improve Idea & Re-verify</span>
+                  </Button>
+                </div>
+              )}
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
                 
@@ -659,6 +927,184 @@ function FounderDashboardContent() {
               )}
             </div>
 
+          </div>
+
+          {/* Founder Control Center & Governance Panel */}
+          <div className="glass-panel p-6 border border-white/10 space-y-6">
+            <div className="flex items-center justify-between border-b border-white/10 pb-4">
+              <div>
+                <h3 className="text-base font-bold text-white flex items-center gap-2">
+                  <Settings2 className="w-4 h-4 text-purple-400" />
+                  <span>Founder Control Center & Venture Governance</span>
+                </h3>
+                <p className="text-xs text-slate-400 mt-0.5">
+                  Manage capital intake gating, minimum ticket sizes, branding partnerships, and sprint backlog injection.
+                </p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              
+              {/* Card 1: Capital Intake & Ticket Size */}
+              <div className="p-4 rounded-2xl bg-white/[0.02] border border-white/5 space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="text-xs font-bold text-white flex items-center gap-2">
+                    <DollarSign className="w-4 h-4 text-emerald-400" />
+                    <span>Capital Intake Gating</span>
+                  </div>
+                  <span className={`px-2 py-0.5 rounded text-[10px] font-semibold border ${
+                    isFundingPaused 
+                      ? 'bg-amber-500/10 text-amber-300 border-amber-500/30' 
+                      : 'bg-emerald-500/10 text-emerald-300 border-emerald-500/30'
+                  }`}>
+                    {isFundingPaused ? 'PAUSED' : 'ACTIVE'}
+                  </span>
+                </div>
+
+                <p className="text-[11px] text-slate-300">
+                  {isFundingPaused 
+                    ? 'Funding commitments are currently blocked for investors. FoundersHub checkout will reject new orders.'
+                    : 'Investors can commit test capital post-sprint with 1% platform fee verification.'}
+                </p>
+
+                <div className="flex items-center gap-3">
+                  <Button
+                    size="sm"
+                    variant={isFundingPaused ? 'glow' : 'secondary'}
+                    onClick={handleToggleFundingPause}
+                    className="flex items-center gap-1.5 text-xs cursor-pointer"
+                  >
+                    {isFundingPaused ? (
+                      <>
+                        <PlayCircle className="w-3.5 h-3.5 text-emerald-400" />
+                        <span>Resume Capital Intake</span>
+                      </>
+                    ) : (
+                      <>
+                        <PauseCircle className="w-3.5 h-3.5 text-amber-400" />
+                        <span>Pause Capital Intake</span>
+                      </>
+                    )}
+                  </Button>
+                </div>
+
+                <div className="pt-3 border-t border-white/5 space-y-1.5">
+                  <label className="block text-[11px] font-semibold text-slate-300">
+                    Minimum Investment Ticket Size (₹)
+                  </label>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="number"
+                      step="5000"
+                      min="5000"
+                      value={minTicketSize}
+                      onChange={(e) => setMinTicketSize(e.target.value)}
+                      className="w-40 glass-input px-3 py-1.5 text-xs text-white"
+                    />
+                    <Button
+                      size="sm"
+                      variant="secondary"
+                      onClick={handleUpdateMinTicket}
+                      className="text-xs cursor-pointer"
+                    >
+                      Save Ticket Minimum
+                    </Button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Card 2: 30-Day Branding Partner Strip & Backlog Injection */}
+              <div className="p-4 rounded-2xl bg-white/[0.02] border border-white/5 space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="text-xs font-bold text-white flex items-center gap-2">
+                    <Sparkles className="w-4 h-4 text-sky-400" />
+                    <span>30-Day Branding Partner Strip</span>
+                  </div>
+                  <span className="text-[10px] text-slate-400">
+                    {(selectedStartup.brandingPartnerships?.length || 0)} Active
+                  </span>
+                </div>
+
+                {selectedStartup.brandingPartnerships && selectedStartup.brandingPartnerships.length > 0 ? (
+                  <div className="space-y-2">
+                    {selectedStartup.brandingPartnerships.map((bp, idx) => (
+                      <div key={idx} className="flex items-center justify-between p-2.5 rounded-xl bg-black/40 border border-white/5 text-xs">
+                        <div className="flex items-center gap-2.5">
+                          <img src={bp.brandingLogoUrl} alt={bp.brandName} className="w-6 h-6 rounded object-contain bg-white/10 p-0.5" />
+                          <div>
+                            <span className="font-semibold text-white">{bp.brandName}</span>
+                            <span className="text-[10px] text-slate-400 block">{bp.sponsorshipDurationDays} days sponsorship</span>
+                          </div>
+                        </div>
+                        <span className="text-[10px] text-emerald-400">Live on Profile</span>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-[11px] text-slate-400">
+                    No active branding partner strip currently configured. Investors can sponsor your venture with a &ldquo;Powered by [Brand]&rdquo; strip post-sprint.
+                  </p>
+                )}
+
+                <div className="pt-3 border-t border-white/5">
+                  <Button
+                    size="sm"
+                    variant="glow"
+                    onClick={() => setTaskModalOpen(true)}
+                    className="flex items-center gap-1.5 text-xs w-full justify-center cursor-pointer"
+                  >
+                    <PlusCircle className="w-3.5 h-3.5" />
+                    <span>Inject Backlog Deliverable to Department</span>
+                  </Button>
+                </div>
+              </div>
+
+            </div>
+
+            {/* Department Builder Roster with Unassign Actions */}
+            {departments.length > 0 && (
+              <div className="pt-2 border-t border-white/10 space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-white flex items-center gap-2">
+                    <Users className="w-3.5 h-3.5 text-indigo-400" />
+                    <span>Department Builder Rosters & Oversight</span>
+                  </span>
+                  <span className="text-[10px] text-slate-400">
+                    {departments.reduce((acc, d) => acc + (d.memberIds?.length || 0), 0)} total builder seats
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                  {departments.map((d) => (
+                    <div key={d._id} className="p-3 rounded-xl bg-black/30 border border-white/5 space-y-2 text-xs">
+                      <div className="font-semibold text-white truncate">{d.name}</div>
+                      <div className="text-[11px] text-slate-400">
+                        {d.memberIds?.length || 0} active builder{d.memberIds?.length === 1 ? '' : 's'}
+                      </div>
+                      {d.memberIds && d.memberIds.length > 0 ? (
+                        <div className="space-y-1 pt-1 border-t border-white/5">
+                          {d.memberIds.map((mId) => (
+                            <div key={mId} className="flex items-center justify-between text-[10px] py-0.5">
+                              <span className="text-slate-300 truncate max-w-[120px]">{mId}</span>
+                              <button
+                                type="button"
+                                onClick={() => handleUnassignBuilder(d._id, mId)}
+                                className="text-red-400 hover:text-red-300 p-0.5 hover:bg-red-500/10 rounded cursor-pointer"
+                                title="Unassign Builder"
+                              >
+                                <UserMinus className="w-3 h-3" />
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="text-[10px] text-slate-500 italic">No builders assigned yet</div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
 
         </div>
@@ -883,6 +1329,233 @@ function FounderDashboardContent() {
           </form>
 
         </div>
+      </Modal>
+
+      {/* Modal: Edit Idea Details & Re-verify */}
+      <Modal
+        isOpen={editModalOpen}
+        onClose={() => setEditModalOpen(false)}
+        title="Edit & Improve Venture Idea"
+        subtitle="Refine your problem statement, validation evidence, or equity split to clear the Readiness Gate."
+      >
+        <form onSubmit={handleUpdateStartup} className="space-y-4">
+          <div>
+            <label className="block text-xs font-semibold text-slate-300 mb-1">Startup Name</label>
+            <input
+              type="text"
+              required
+              value={editName}
+              onChange={(e) => setEditName(e.target.value)}
+              className="w-full glass-input px-3 py-2 text-xs text-white"
+            />
+          </div>
+
+          <div>
+            <label className="block text-xs font-semibold text-slate-300 mb-1">Tagline</label>
+            <input
+              type="text"
+              required
+              value={editTagline}
+              onChange={(e) => setEditTagline(e.target.value)}
+              className="w-full glass-input px-3 py-2 text-xs text-white"
+            />
+          </div>
+
+          <div>
+            <label className="block text-xs font-semibold text-slate-300 mb-1">Sector</label>
+            <select
+              value={editSector}
+              onChange={(e) => setEditSector(e.target.value)}
+              className="w-full glass-input px-3 py-2 text-xs text-white bg-slate-900"
+            >
+              <option value="AI / Software">AI / Software</option>
+              <option value="FinTech">FinTech</option>
+              <option value="CleanTech">CleanTech</option>
+              <option value="HealthTech">HealthTech</option>
+              <option value="B2B SaaS">B2B SaaS</option>
+              <option value="EdTech">EdTech</option>
+              <option value="Logistics">Logistics</option>
+            </select>
+          </div>
+
+          <div>
+            <div className="flex items-center justify-between mb-1">
+              <label className="text-xs font-semibold text-slate-300">Problem Statement</label>
+              <span className={`text-[10px] font-mono ${editProblem.length >= 30 ? 'text-emerald-400' : 'text-amber-400 font-bold'}`}>
+                {editProblem.length}/30 min chars {editProblem.length >= 30 ? '✓' : `(Needs ${30 - editProblem.length} more)`}
+              </span>
+            </div>
+            <textarea
+              required
+              rows={3}
+              value={editProblem}
+              onChange={(e) => setEditProblem(e.target.value)}
+              placeholder="Clearly define the customer pain point and market inefficiency (minimum 30 characters)..."
+              className={`w-full glass-input p-2.5 text-xs text-white ${editProblem.length < 30 ? 'border-amber-500/50' : 'border-emerald-500/40'}`}
+            />
+          </div>
+
+          <div>
+            <div className="flex items-center justify-between mb-1">
+              <label className="text-xs font-semibold text-slate-300">Validation Evidence</label>
+              <span className={`text-[10px] font-mono ${editValidation.length >= 20 ? 'text-emerald-400' : 'text-amber-400 font-bold'}`}>
+                {editValidation.length}/20 min chars {editValidation.length >= 20 ? '✓' : `(Needs ${20 - editValidation.length} more)`}
+              </span>
+            </div>
+            <textarea
+              required
+              rows={3}
+              value={editValidation}
+              onChange={(e) => setEditValidation(e.target.value)}
+              placeholder="Interviews, prototype signals, waitlist metrics, or LOIs (minimum 20 characters)..."
+              className={`w-full glass-input p-2.5 text-xs text-white ${editValidation.length < 20 ? 'border-amber-500/50' : 'border-emerald-500/40'}`}
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-3 p-3 rounded-xl bg-black/40 border border-white/5">
+            <div>
+              <label className="block text-[11px] font-semibold text-slate-300 mb-1">Founder Equity (%)</label>
+              <input
+                type="number"
+                min="30"
+                max="90"
+                value={editFounderEquity}
+                onChange={(e) => setEditFounderEquity(Number(e.target.value))}
+                className="w-full glass-input px-3 py-1.5 text-xs text-white"
+              />
+            </div>
+            <div>
+              <label className="block text-[11px] font-semibold text-slate-300 mb-1">Builders Pool (%)</label>
+              <input
+                type="number"
+                min="10"
+                max="60"
+                value={editBuildersEquity}
+                onChange={(e) => setEditBuildersEquity(Number(e.target.value))}
+                className="w-full glass-input px-3 py-1.5 text-xs text-white"
+              />
+              <span className="text-[10px] text-slate-400 block mt-0.5">Min 10% for sprint builders</span>
+            </div>
+          </div>
+
+          <div className="flex justify-end gap-2 pt-2">
+            <Button type="button" variant="ghost" onClick={() => setEditModalOpen(false)}>Cancel</Button>
+            <Button type="submit" variant="glow" isLoading={isUpdating} disabled={editProblem.length < 30 || editValidation.length < 20}>
+              Save & Re-verify
+            </Button>
+          </div>
+        </form>
+      </Modal>
+
+      {/* Modal: Delete Startup Confirmation */}
+      <Modal
+        isOpen={deleteModalOpen}
+        onClose={() => setDeleteModalOpen(false)}
+        title={`Delete "${selectedStartup?.name}"?`}
+        subtitle="This action is irreversible and permanently deletes this idea, sprint workspace, and tasks."
+      >
+        <div className="space-y-4">
+          <div className="p-3.5 rounded-xl bg-red-500/10 border border-red-500/30 text-xs text-red-300 flex items-start gap-2.5">
+            <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5 text-red-400" />
+            <div>
+              <b>Permanent Deletion Warning:</b> All associated sprint records, Kanban tasks, builder applications, and funding commitments for this venture will be permanently erased.
+            </div>
+          </div>
+
+          <div className="flex justify-end gap-2 pt-2">
+            <Button type="button" variant="ghost" onClick={() => setDeleteModalOpen(false)}>Cancel</Button>
+            <Button
+              type="button"
+              variant="secondary"
+              isLoading={isDeleting}
+              onClick={handleDeleteStartup}
+              className="text-red-400 border-red-500/30 hover:bg-red-500/20 cursor-pointer"
+            >
+              Confirm Permanent Deletion
+            </Button>
+          </div>
+        </div>
+      </Modal>
+
+      {/* Modal: Inject Deliverable to Department */}
+      <Modal
+        isOpen={taskModalOpen}
+        onClose={() => setTaskModalOpen(false)}
+        title="Inject Deliverable to Department Backlog"
+        subtitle="Directly inject high-priority sprint tasks into any department's Kanban board."
+      >
+        <form onSubmit={handleInjectTask} className="space-y-4">
+          <div>
+            <label className="block text-xs font-semibold text-slate-300 mb-1">Target Department</label>
+            <select
+              required
+              value={taskDeptId}
+              onChange={(e) => setTaskDeptId(e.target.value)}
+              className="w-full glass-input px-3 py-2 text-xs text-white bg-slate-900"
+            >
+              {departments.map(d => (
+                <option key={d._id} value={d._id}>{d.name}</option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-xs font-semibold text-slate-300 mb-1">Task Title</label>
+            <input
+              type="text"
+              required
+              value={taskTitle}
+              onChange={(e) => setTaskTitle(e.target.value)}
+              placeholder="e.g. Implement resilient Redis cache layer"
+              className="w-full glass-input px-3 py-2 text-xs text-white"
+            />
+          </div>
+
+          <div>
+            <label className="block text-xs font-semibold text-slate-300 mb-1">Description & Acceptance Criteria</label>
+            <textarea
+              rows={3}
+              value={taskDescription}
+              onChange={(e) => setTaskDescription(e.target.value)}
+              placeholder="What specifically needs to be built and verified?"
+              className="w-full glass-input p-2.5 text-xs text-white"
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs font-semibold text-slate-300 mb-1">Priority</label>
+              <select
+                value={taskPriority}
+                onChange={(e) => setTaskPriority(e.target.value as any)}
+                className="w-full glass-input px-3 py-2 text-xs text-white bg-slate-900"
+              >
+                <option value="low">Low</option>
+                <option value="medium">Medium</option>
+                <option value="high">High</option>
+                <option value="critical">Critical</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-slate-300 mb-1">Contribution Points</label>
+              <input
+                type="number"
+                min="10"
+                max="50"
+                value={taskPoints}
+                onChange={(e) => setTaskPoints(Number(e.target.value))}
+                className="w-full glass-input px-3 py-2 text-xs text-white"
+              />
+            </div>
+          </div>
+
+          <div className="flex justify-end gap-2 pt-2">
+            <Button type="button" variant="ghost" onClick={() => setTaskModalOpen(false)}>Cancel</Button>
+            <Button type="submit" variant="glow" isLoading={isSubmittingTask}>
+              Commit to Backlog
+            </Button>
+          </div>
+        </form>
       </Modal>
 
     </div>

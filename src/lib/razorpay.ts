@@ -13,7 +13,7 @@ export function isRazorpayConfigured(): boolean {
 }
 
 export function getPublicRazorpayKey(): string {
-  return process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || 'rzp_test_foundershub_mock';
+  return process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || process.env.RAZORPAY_KEY_ID || 'rzp_test_TapPgFU2Xu6U6w';
 }
 
 /**

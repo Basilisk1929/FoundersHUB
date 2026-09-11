@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { authorizeDepartmentAccess } from '@/lib/auth/rbac';
+import { getGeminiApiKey } from '@/lib/gemini';
 
 export async function POST(req: NextRequest) {
   try {
@@ -8,7 +9,7 @@ export async function POST(req: NextRequest) {
 
     const { department, startup } = await authorizeDepartmentAccess(departmentId);
 
-    const geminiKey = process.env.GEMINI_API_KEY;
+    const geminiKey = getGeminiApiKey();
     if (geminiKey && topic) {
       try {
         const prompt = `Generate a Standard Operating Procedure (SOP) JSON for the ${department.name} department of the startup "${startup.name}" on the topic: "${topic}". Return JSON with fields: title (string), department (string), startup (string), version ("1.0"), effectiveDate (YYYY-MM-DD), purpose (string), steps (array of 4 objects with step (number), name (string), action (string)), complianceNotes (string).`;

@@ -54,6 +54,8 @@ export interface StartupDoc {
   ownershipTimestamp?: string;
   activeSprintId?: string;
   totalFundedAmount?: number;
+  isFundingPaused?: boolean;
+  minTicketSize?: number;
   brandingPartnerships?: Array<{
     investorId: string;
     brandName: string;

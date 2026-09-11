@@ -99,7 +99,8 @@ export default function StartupProfilePage() {
     value: Number(value)
   }));
 
-  const canFund = startup.stage === 'sprint_completed' || startup.stage === 'funded';
+  const isFundingUnlocked = startup.stage === 'sprint_completed' || startup.stage === 'funded';
+  const canFund = isFundingUnlocked && !startup.isFundingPaused;
 
   const handleApply = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -197,27 +198,33 @@ export default function StartupProfilePage() {
                 </a>
               ) : (
                 <>
-                  <Button
-                    variant="secondary"
-                    size="md"
-                    onClick={() => { setApplyStatus(null); setApplyModalOpen(true); }}
-                    className="text-sky-300 border-sky-500/30 hover:bg-sky-500/10"
-                  >
-                    <Code2 className="w-4 h-4" />
-                    <span>Apply to Dept</span>
-                  </Button>
+                  {/* Developers see only Apply to Dept */}
+                  {(!user || user.role === 'developer') && (
+                    <Button
+                      variant="secondary"
+                      size="md"
+                      onClick={() => { setApplyStatus(null); setApplyModalOpen(true); }}
+                      className="text-sky-300 border-sky-500/30 hover:bg-sky-500/10"
+                    >
+                      <Code2 className="w-4 h-4" />
+                      <span>Apply to Dept</span>
+                    </Button>
+                  )}
 
-                  <Button
-                    variant={canFund ? 'glow' : 'ghost'}
-                    size="md"
-                    disabled={!canFund}
-                    onClick={() => { setFundStatus(null); setFundModalOpen(true); }}
-                    className={!canFund ? 'text-slate-500 border-white/5 cursor-not-allowed' : ''}
-                    title={canFund ? 'Commit investment or sponsorship' : 'Funding locked until sprint is completed'}
-                  >
-                    <TrendingUp className="w-4 h-4" />
-                    <span>{canFund ? 'Back with Capital' : 'Funding Gated'}</span>
-                  </Button>
+                  {/* Investors see only Back with Capital */}
+                  {(!user || user.role === 'investor') && (
+                    <Button
+                      variant={canFund ? 'glow' : 'ghost'}
+                      size="md"
+                      disabled={!canFund}
+                      onClick={() => { setFundStatus(null); setFundModalOpen(true); }}
+                      className={!canFund ? 'text-slate-500 border-white/5 cursor-not-allowed' : ''}
+                      title={canFund ? 'Commit investment or sponsorship' : startup.isFundingPaused ? 'Funding intake is paused by founder' : 'Funding locked until sprint is completed'}
+                    >
+                      <TrendingUp className="w-4 h-4" />
+                      <span>{canFund ? 'Back with Capital' : startup.isFundingPaused ? 'Funding Paused' : 'Funding Gated'}</span>
+                    </Button>
+                  )}
                 </>
               )}
             </div>

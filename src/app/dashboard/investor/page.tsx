@@ -20,6 +20,7 @@ import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
 import { Modal } from '@/components/ui/Modal';
 import { useAuth } from '@/components/auth/AuthContext';
+import { openRazorpayCheckout } from '@/lib/razorpay-client';
 import { StartupDoc, FundingRequestDoc } from '@/types';
 
 export default function InvestorDashboardPage() {
@@ -36,6 +37,7 @@ export default function InvestorDashboardPage() {
   const [brandingLogo, setBrandingLogo] = useState('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=100&auto=format&fit=crop&q=80');
   const [isProcessing, setIsProcessing] = useState(false);
   const [commitResult, setCommitResult] = useState<any>(null);
+  const [fallbackPaymentInfo, setFallbackPaymentInfo] = useState<any>(null);
 
   useEffect(() => {
     fetchInvestorData();
@@ -66,12 +68,45 @@ export default function InvestorDashboardPage() {
     setCommitModalOpen(true);
   };
 
+  const completeVerification = async (reqId: string, paymentId: string, orderId: string, signature: string) => {
+    setIsProcessing(true);
+    try {
+      const verifyRes = await fetch('/api/funding/razorpay/verify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          fundingRequestId: reqId,
+          razorpayOrderId: orderId,
+          razorpayPaymentId: paymentId,
+          razorpaySignature: signature
+        })
+      });
+      const verifyData = await verifyRes.json();
+      if (verifyRes.ok) {
+        setCommitResult({
+          success: true,
+          message: `Razorpay test payment verified! Payment ID: ${paymentId}. ₹${Number(amount).toLocaleString()} transferred. 1% platform fee recorded.`
+        });
+        setFallbackPaymentInfo(null);
+        fetchInvestorData();
+      } else {
+        setCommitResult({ error: verifyData.error || 'Verification failed' });
+      }
+    } catch (err) {
+      console.error(err);
+      setCommitResult({ error: 'Failed to verify transaction' });
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
   const handleRazorpayTestCheckout = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!targetStartup) return;
 
     setIsProcessing(true);
     setCommitResult(null);
+    setFallbackPaymentInfo(null);
 
     try {
       // 1. Submit funding request
@@ -106,33 +141,52 @@ export default function InvestorDashboardPage() {
         })
       });
       const orderData = await orderRes.json();
+      if (!orderRes.ok) {
+        setCommitResult({ error: orderData.error || 'Failed to create Razorpay order' });
+        setIsProcessing(false);
+        return;
+      }
 
-      // 3. Verify Payment in Sandbox
-      const verifyRes = await fetch('/api/funding/razorpay/verify', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          fundingRequestId: reqId,
-          razorpayOrderId: orderData.orderId,
-          razorpayPaymentId: `pay_test_${Date.now()}`,
-          razorpaySignature: 'test_mode_verified_sig'
-        })
+      // 3. Launch Razorpay Test Mode Checkout Portal
+      const opened = await openRazorpayCheckout({
+        keyId: orderData.keyId,
+        orderId: orderData.orderId,
+        amount: Number(amount),
+        name: `FoundersHub — ${targetStartup.name}`,
+        description: commitType === 'branding_partnership' ? '30-Day Branding Sponsorship (Test Mode)' : 'Direct Venture Syndication (Test Mode)',
+        prefill: {
+          name: user?.name || 'Investor Admin',
+          email: user?.email || 'investor@founderhub.com'
+        },
+        onSuccess: (paymentResp) => {
+          completeVerification(
+            reqId,
+            paymentResp.razorpay_payment_id,
+            paymentResp.razorpay_order_id,
+            paymentResp.razorpay_signature
+          );
+        },
+        onError: (err) => {
+          setCommitResult({ error: err.description || 'Razorpay checkout cancelled or failed' });
+          setIsProcessing(false);
+        },
+        onDismiss: () => {
+          setIsProcessing(false);
+        }
       });
 
-      const verifyData = await verifyRes.json();
-      if (verifyRes.ok) {
-        setCommitResult({
-          success: true,
-          message: `Test mode payment verified! ₹${Number(amount).toLocaleString()} transferred. 1% platform fee recorded.`
+      // If Razorpay SDK couldn't open directly (e.g. adblocker or sandbox browser), show fallback
+      if (!opened) {
+        setFallbackPaymentInfo({
+          reqId,
+          orderId: orderData.orderId,
+          amount: Number(amount)
         });
-        fetchInvestorData();
-      } else {
-        setCommitResult({ error: verifyData.error });
+        setIsProcessing(false);
       }
     } catch (e) {
       console.error(e);
       setCommitResult({ error: 'Checkout error occurred' });
-    } finally {
       setIsProcessing(false);
     }
   };
@@ -429,16 +483,47 @@ export default function InvestorDashboardPage() {
               </div>
             )}
 
-            <div className="p-3 rounded-xl bg-black/40 border border-white/5 space-y-1 text-xs text-slate-400">
-              <div className="text-slate-200 font-medium">Payment Gateway: Razorpay Test Sandbox</div>
-              <div>Simulates authentic checkout, webhook confirmation, and receipt generation.</div>
-            </div>
+            {fallbackPaymentInfo ? (
+              <div className="p-4 rounded-xl bg-indigo-500/10 border border-indigo-500/30 text-xs space-y-3">
+                <div className="font-bold text-white flex items-center gap-2">
+                  <CreditCard className="w-4 h-4 text-indigo-400" />
+                  <span>Razorpay Test Portal (In-App Sandbox)</span>
+                </div>
+                <p className="text-slate-300">
+                  Razorpay Order <b className="text-white">{fallbackPaymentInfo.orderId}</b> generated for ₹{fallbackPaymentInfo.amount.toLocaleString()}. External popup was blocked by browser or running in sandboxed environment.
+                </p>
+                <Button
+                  type="button"
+                  variant="glow"
+                  className="w-full"
+                  isLoading={isProcessing}
+                  onClick={() => completeVerification(
+                    fallbackPaymentInfo.reqId,
+                    `pay_test_${Date.now()}`,
+                    fallbackPaymentInfo.orderId,
+                    'test_mode_verified_sig'
+                  )}
+                >
+                  Authorize Test Payment of ₹{fallbackPaymentInfo.amount.toLocaleString()}
+                </Button>
+              </div>
+            ) : (
+              <div className="p-3 rounded-xl bg-black/40 border border-white/5 space-y-1 text-xs text-slate-400">
+                <div className="text-slate-200 font-medium flex items-center gap-1.5">
+                  <CreditCard className="w-3.5 h-3.5 text-indigo-400" />
+                  <span>Razorpay Test Mode Portal</span>
+                </div>
+                <div>Launches Razorpay checkout with test UPI, NetBanking, and Card simulators. 1% platform fee recorded.</div>
+              </div>
+            )}
 
             <div className="flex justify-end gap-2 pt-2">
               <Button type="button" variant="ghost" onClick={() => setCommitModalOpen(false)}>Cancel</Button>
-              <Button type="submit" variant="glow" isLoading={isProcessing}>
-                Confirm & Authorize Payment
-              </Button>
+              {!fallbackPaymentInfo && (
+                <Button type="submit" variant="glow" isLoading={isProcessing}>
+                  Launch Razorpay Checkout
+                </Button>
+              )}
             </div>
           </form>
         )}

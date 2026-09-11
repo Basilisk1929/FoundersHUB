@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { authorizeDepartmentAccess } from '@/lib/auth/rbac';
+import { getGeminiApiKey } from '@/lib/gemini';
 
 export async function POST(req: NextRequest) {
   try {
@@ -11,7 +12,7 @@ export async function POST(req: NextRequest) {
     const weekCount = Math.ceil(sprintDays / 7);
     const plan: any[] = [];
 
-    const geminiKey = process.env.GEMINI_API_KEY;
+    const geminiKey = getGeminiApiKey();
     if (geminiKey) {
       try {
         const prompt = `Generate a structured ${sprintDays}-day sprint roadmap for the ${department.name} department of the venture "${startup.name}" (${startup.tagline}). Return JSON with an array of objects for each week, having fields: week (number), title (string), goals (array of 3 strings), and suggestedTasks (array of 2 objects with title, points 10-30, priority 'high'|'medium').`;

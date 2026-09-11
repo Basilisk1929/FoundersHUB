@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { authorizeDepartmentAccess } from '@/lib/auth/rbac';
 import { getDb } from '@/lib/db/mongodb';
-import { TaskDoc, TimelineEventDoc, UserDoc, ExpenseDoc, FileCommitDoc, SprintDoc } from '@/types';
+import { TaskDoc, TimelineEventDoc, UserDoc, ExpenseDoc, FileCommitDoc, SprintDoc, DepartmentDoc } from '@/types';
 import { calculateExecutionScore } from '@/lib/execution-score';
 
 export async function GET(
@@ -97,3 +97,35 @@ export async function GET(
     return NextResponse.json({ error: 'Failed to fetch department workspace' }, { status: 500 });
   }
 }
+
+export async function PATCH(
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id } = await params;
+    const { user, department, startup } = await authorizeDepartmentAccess(id);
+    if (startup.founderId !== user.userId) {
+      return NextResponse.json({ error: 'Only founder can manage department membership' }, { status: 403 });
+    }
+    const body = await req.json();
+    const { action, memberId } = body;
+
+    const db = await getDb();
+    const deptCol = db.collection<DepartmentDoc>('departments');
+
+    if (action === 'remove_member' && memberId) {
+      const updatedMembers = department.memberIds.filter(m => m !== memberId);
+      await deptCol.updateOne(
+        { _id: id },
+        { $set: { memberIds: updatedMembers } }
+      );
+      return NextResponse.json({ success: true, message: 'Member unassigned from department' });
+    }
+
+    return NextResponse.json({ error: 'Invalid action' }, { status: 400 });
+  } catch (error: any) {
+    return NextResponse.json({ error: error.message || 'Failed to update department' }, { status: 500 });
+  }
+}
+

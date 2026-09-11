@@ -56,7 +56,11 @@ export function FloatingChatbot() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           mode: 'support',
-          message: textToSend
+          message: textToSend,
+          history: messages.slice(-8).map(m => ({
+            role: m.sender === 'user' ? 'user' : 'model',
+            content: m.text
+          }))
         })
       });
       const data = await res.json();

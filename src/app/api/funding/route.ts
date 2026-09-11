@@ -83,8 +83,22 @@ export async function POST(req: NextRequest) {
       }, { status: 400 });
     }
 
+    // Founder Control Gate: Check if funding intake is paused
+    if (startup.isFundingPaused) {
+      return NextResponse.json({
+        error: 'Funding intake is currently paused by the founder.'
+      }, { status: 400 });
+    }
+
     const fundingType = type === 'branding_partnership' ? 'branding_partnership' : 'investment';
     const commitAmount = Number(amount) || 0;
+
+    // Founder Control Gate: Minimum ticket size check
+    if (startup.minTicketSize && commitAmount < startup.minTicketSize) {
+      return NextResponse.json({
+        error: `Minimum investment ticket size for ${startup.name} is ₹${startup.minTicketSize.toLocaleString()}.`
+      }, { status: 400 });
+    }
     const platformFee = calculatePlatformFee(commitAmount);
 
     const fundingCol = db.collection<FundingRequestDoc>('fundingRequests');

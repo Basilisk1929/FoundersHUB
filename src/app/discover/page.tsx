@@ -13,13 +13,16 @@ import {
   Code2, 
   TrendingUp,
   AlertTriangle,
-  Send
+  Send,
+  Briefcase,
+  CreditCard
 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
 import { Modal } from '@/components/ui/Modal';
 import { ProgressRing } from '@/components/ui/ProgressRing';
 import { useAuth } from '@/components/auth/AuthContext';
+import { openRazorpayCheckout } from '@/lib/razorpay-client';
 import { StartupDoc } from '@/types';
 
 export default function DiscoverPage() {
@@ -48,6 +51,7 @@ export default function DiscoverPage() {
   const [brandingLogo, setBrandingLogo] = useState('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=100&auto=format&fit=crop&q=80');
   const [agreementAccepted, setAgreementAccepted] = useState(false);
   const [fundStatus, setFundStatus] = useState<{ success?: boolean; message?: string; error?: string } | null>(null);
+  const [fallbackPaymentInfo, setFallbackPaymentInfo] = useState<any>(null);
 
   useEffect(() => {
     fetchStartups();
@@ -86,6 +90,7 @@ export default function DiscoverPage() {
   const openFundModal = (startup: StartupDoc) => {
     setTargetStartup(startup);
     setFundStatus(null);
+    setFallbackPaymentInfo(null);
     setAgreementAccepted(false);
     setFundModalOpen(true);
   };
@@ -122,14 +127,47 @@ export default function DiscoverPage() {
     }
   };
 
+  const completeFundVerification = async (reqId: string, paymentId: string, orderId: string, signature: string) => {
+    setIsSubmitting(true);
+    try {
+      const verifyRes = await fetch('/api/funding/razorpay/verify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          fundingRequestId: reqId,
+          razorpayOrderId: orderId,
+          razorpayPaymentId: paymentId,
+          razorpaySignature: signature
+        })
+      });
+      const verifyData = await verifyRes.json();
+      if (verifyRes.ok) {
+        setFundStatus({
+          success: true,
+          message: `Razorpay test payment verified! Payment ID: ${paymentId}. ₹${Number(fundAmount).toLocaleString()} committed to ${targetStartup?.name}. 1% platform fee recorded.`
+        });
+        setFallbackPaymentInfo(null);
+        fetchStartups();
+      } else {
+        setFundStatus({ error: verifyData.error || 'Signature verification failed' });
+      }
+    } catch {
+      setFundStatus({ error: 'Failed to verify transaction' });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   const handleFundSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!targetStartup) return;
 
     setIsSubmitting(true);
     setFundStatus(null);
+    setFallbackPaymentInfo(null);
 
     try {
+      // 1. Submit funding request
       const res = await fetch('/api/funding', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -143,17 +181,69 @@ export default function DiscoverPage() {
       });
 
       const data = await res.json();
-      if (res.ok) {
-        setFundStatus({
-          success: true,
-          message: 'Funding commitment submitted! 1% platform fee recorded. Founder has received your term sheet.'
-        });
-      } else {
+      if (!res.ok) {
         setFundStatus({ error: data.error || 'Funding request failed' });
+        setIsSubmitting(false);
+        return;
+      }
+
+      const reqId = data.fundingRequest._id;
+
+      // 2. Generate Razorpay Test Order
+      const orderRes = await fetch('/api/funding/razorpay/order', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          fundingRequestId: reqId,
+          amount: Number(fundAmount)
+        })
+      });
+
+      const orderData = await orderRes.json();
+      if (!orderRes.ok) {
+        setFundStatus({ error: orderData.error || 'Failed to create Razorpay test order' });
+        setIsSubmitting(false);
+        return;
+      }
+
+      // 3. Launch official Razorpay Checkout portal (Test Mode)
+      const opened = await openRazorpayCheckout({
+        keyId: orderData.keyId,
+        orderId: orderData.orderId,
+        amount: Number(fundAmount),
+        name: `FoundersHub — ${targetStartup.name}`,
+        description: fundType === 'branding_partnership' ? '30-Day Branding Sponsorship (Test Mode)' : 'Direct Venture Syndication (Test Mode)',
+        prefill: {
+          name: user?.name || 'Investor Admin',
+          email: user?.email || 'investor@founderhub.com'
+        },
+        onSuccess: (paymentResp) => {
+          completeFundVerification(
+            reqId,
+            paymentResp.razorpay_payment_id,
+            paymentResp.razorpay_order_id,
+            paymentResp.razorpay_signature
+          );
+        },
+        onError: (err) => {
+          setFundStatus({ error: err.description || 'Razorpay checkout was cancelled' });
+          setIsSubmitting(false);
+        },
+        onDismiss: () => {
+          setIsSubmitting(false);
+        }
+      });
+
+      if (!opened) {
+        setFallbackPaymentInfo({
+          reqId,
+          orderId: orderData.orderId,
+          amount: Number(fundAmount)
+        });
+        setIsSubmitting(false);
       }
     } catch {
       setFundStatus({ error: 'Network error submitting funding request' });
-    } finally {
       setIsSubmitting(false);
     }
   };
@@ -334,30 +424,70 @@ export default function DiscoverPage() {
                     </a>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-2 pt-1">
-                    {/* Developer Apply Button */}
-                    <Button
-                      variant="secondary"
-                      size="sm"
-                      onClick={() => openApplyModal(startup)}
-                      className="w-full text-xs text-sky-300 border-sky-500/20 hover:bg-sky-500/10"
-                    >
-                      <Code2 className="w-3.5 h-3.5" />
-                      <span>Apply to Dept</span>
-                    </Button>
+                  <div className="pt-1">
+                    {/* Developer: ONLY Apply to Dept */}
+                    {user?.role === 'developer' && (
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        onClick={() => openApplyModal(startup)}
+                        className="w-full text-xs text-sky-300 border-sky-500/20 hover:bg-sky-500/10"
+                      >
+                        <Code2 className="w-3.5 h-3.5" />
+                        <span>Apply to Dept (Builder)</span>
+                      </Button>
+                    )}
 
-                    {/* Investor Funding Button */}
-                    <Button
-                      variant={canFund ? 'glow' : 'ghost'}
-                      size="sm"
-                      disabled={!canFund}
-                      onClick={() => openFundModal(startup)}
-                      className={`w-full text-xs ${!canFund ? 'text-slate-500 border-white/5 cursor-not-allowed' : ''}`}
-                      title={canFund ? 'Commit funding or sponsorship' : 'Funding locked until sprint is completed'}
-                    >
-                      <TrendingUp className="w-3.5 h-3.5" />
-                      <span>{canFund ? 'Commit Funds' : 'Funding Gated'}</span>
-                    </Button>
+                    {/* Investor: ONLY Commit Funds / Invest */}
+                    {user?.role === 'investor' && (
+                      <Button
+                        variant={canFund ? 'glow' : 'ghost'}
+                        size="sm"
+                        disabled={!canFund}
+                        onClick={() => openFundModal(startup)}
+                        className={`w-full text-xs ${!canFund ? 'text-slate-500 border-white/5 cursor-not-allowed' : ''}`}
+                        title={canFund ? 'Commit investment or 30-day sponsorship' : 'Funding locked until sprint is completed'}
+                      >
+                        <TrendingUp className="w-3.5 h-3.5" />
+                        <span>{canFund ? 'Invest / Commit Funds' : 'Funding Gated (Sprint Active)'}</span>
+                      </Button>
+                    )}
+
+                    {/* Founder of this venture: Manage Venture */}
+                    {user?.role === 'founder' && user._id === startup.founderId && (
+                      <a href={`/dashboard/founder?startupId=${startup._id}`} className="block w-full">
+                        <Button variant="glow" size="sm" className="w-full text-xs flex items-center justify-center gap-1.5">
+                          <Briefcase className="w-3.5 h-3.5" />
+                          <span>Manage Your Venture</span>
+                        </Button>
+                      </a>
+                    )}
+
+                    {/* Guest or other users */}
+                    {(!user || (user.role === 'founder' && user._id !== startup.founderId)) && (
+                      <div className="grid grid-cols-2 gap-2">
+                        <Button
+                          variant="secondary"
+                          size="sm"
+                          onClick={() => openApplyModal(startup)}
+                          className="w-full text-xs text-sky-300 border-sky-500/20 hover:bg-sky-500/10"
+                        >
+                          <Code2 className="w-3.5 h-3.5" />
+                          <span>Apply</span>
+                        </Button>
+                        <Button
+                          variant={canFund ? 'glow' : 'ghost'}
+                          size="sm"
+                          disabled={!canFund}
+                          onClick={() => openFundModal(startup)}
+                          className={`w-full text-xs ${!canFund ? 'text-slate-500 border-white/5 cursor-not-allowed' : ''}`}
+                          title={canFund ? 'Invest' : 'Gated'}
+                        >
+                          <TrendingUp className="w-3.5 h-3.5" />
+                          <span>{canFund ? 'Invest' : 'Gated'}</span>
+                        </Button>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
@@ -534,6 +664,40 @@ export default function DiscoverPage() {
               </div>
             )}
 
+            {fallbackPaymentInfo ? (
+              <div className="p-4 rounded-xl bg-indigo-500/10 border border-indigo-500/30 text-xs space-y-3">
+                <div className="font-bold text-white flex items-center gap-2">
+                  <CreditCard className="w-4 h-4 text-indigo-400" />
+                  <span>Razorpay Test Portal (In-App Sandbox)</span>
+                </div>
+                <p className="text-slate-300">
+                  Razorpay Order <b className="text-white">{fallbackPaymentInfo.orderId}</b> generated for ₹{fallbackPaymentInfo.amount.toLocaleString()}. External checkout popup was prevented or blocked by browser.
+                </p>
+                <Button
+                  type="button"
+                  variant="glow"
+                  className="w-full"
+                  isLoading={isSubmitting}
+                  onClick={() => completeFundVerification(
+                    fallbackPaymentInfo.reqId,
+                    `pay_test_${Date.now()}`,
+                    fallbackPaymentInfo.orderId,
+                    'test_mode_verified_sig'
+                  )}
+                >
+                  Authorize Test Payment of ₹{fallbackPaymentInfo.amount.toLocaleString()}
+                </Button>
+              </div>
+            ) : (
+              <div className="p-3 rounded-xl bg-black/40 border border-white/5 space-y-1 text-xs text-slate-400">
+                <div className="text-slate-200 font-medium flex items-center gap-1.5">
+                  <CreditCard className="w-3.5 h-3.5 text-indigo-400" />
+                  <span>Razorpay Test Mode Portal</span>
+                </div>
+                <div>Opens official Razorpay modal with test card & UPI simulators. 1% platform fee recorded.</div>
+              </div>
+            )}
+
             <div className="p-3 rounded-xl bg-black/40 border border-white/5 space-y-2">
               <label className="flex items-start gap-2.5 cursor-pointer text-xs text-slate-300">
                 <input
@@ -550,7 +714,7 @@ export default function DiscoverPage() {
             </div>
 
             <div className="pt-2 flex justify-end gap-2">
-              <Button type="button" variant="ghost" onClick={() => setFundModalOpen(false)}>Cancel</Button>
+              <Button type="button" variant="ghost" onClick={() => { setFundModalOpen(false); setFallbackPaymentInfo(null); }}>Cancel</Button>
               <Button type="submit" variant="glow" isLoading={isSubmitting} disabled={!agreementAccepted}>
                 Submit Commitment
               </Button>

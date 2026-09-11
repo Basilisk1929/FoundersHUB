@@ -65,7 +65,8 @@ export async function PATCH(
     const allowedUpdates: (keyof StartupDoc)[] = [
       'name', 'tagline', 'description', 'problemStatement', 
       'validationEvidence', 'sector', 'tags', 'proposedEquitySplit',
-      'pitchDeckUrl', 'pitchVideoUrl', 'images', 'visibility'
+      'pitchDeckUrl', 'pitchVideoUrl', 'images', 'visibility',
+      'isFundingPaused', 'minTicketSize', 'brandingPartnerships'
     ];
 
     const updateFields: Partial<StartupDoc> = {};

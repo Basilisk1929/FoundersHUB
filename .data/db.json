@@ -1051,6 +1051,15 @@
       "actorName": "Vikram Mehta",
       "details": "Razorpay Test Mode payment completed! Transferred ₹500,000 (Order: order_test_1789148715219_gi1qs).",
       "createdAt": "2026-09-11T17:45:18.878Z"
+    },
+    {
+      "_id": "tml_1789158551339",
+      "startupId": "stp_neuroflow",
+      "eventType": "funding_requested",
+      "actorId": "usr_investor_vikram",
+      "actorName": "Vikram Mehta",
+      "details": "Vikram Mehta submitted a ₹500,000 investment commitment (Test Mode).",
+      "createdAt": "2026-09-11T20:29:11.404Z"
     }
   ],
   "expenses": [
@@ -1160,6 +1169,23 @@
       "paymentStatus": "success",
       "razorpayPaymentId": "pay_test_verified_123",
       "processedAt": "2026-09-11T17:45:18.877Z"
+    },
+    {
+      "_id": "fnd_1789158551334_3lnfl",
+      "startupId": "stp_neuroflow",
+      "startupName": "NeuroFlow Health",
+      "investorId": "usr_investor_vikram",
+      "investorName": "Vikram Mehta",
+      "type": "investment",
+      "amount": 500000,
+      "message": "",
+      "contactDetails": "investor@founderhub.com",
+      "agreementAccepted": true,
+      "status": "pending",
+      "platformFeeAmount": 5000,
+      "requestedAt": "2026-09-11T20:29:11.334Z",
+      "razorpayOrderId": "order_TarUrYcuHMqKoQ",
+      "paymentStatus": "created"
     }
   ],
   "applications": [

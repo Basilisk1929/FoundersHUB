@@ -2,6 +2,7 @@ import { NextRequest } from 'next/server';
 import { requireAuth } from '@/lib/auth/rbac';
 import { getDb } from '@/lib/db/mongodb';
 import { StartupDoc, TaskDoc, DepartmentDoc, ExpenseDoc, SprintDoc, FundingRequestDoc } from '@/types';
+import { callGemini, GeminiMessage } from '@/lib/gemini';
 
 export async function POST(req: NextRequest) {
   try {
@@ -41,59 +42,61 @@ export async function POST(req: NextRequest) {
 
     const promptContext = `
 Startup Name: ${startup.name}
+Tagline: ${startup.tagline}
+Sector: ${startup.sector}
+Problem Statement: ${startup.problemStatement}
+Validation Evidence: ${startup.validationEvidence || 'Initial customer feedback gathered'}
+Tags: ${startup.tags.join(', ')}
 Stage: ${startup.stage}
 Execution Score: ${startup.executionScore}/100
 Total Tasks: ${tasks.length} (Completed: ${completedTasks.length}, In Progress: ${inProgressTasks.length})
-Critical Priority Tasks: ${criticalTasks.length}
-Departments (${departments.length}): ${departments.map(d => `${d.name} (${d.memberIds.length} members)`).join(', ')}
+Critical Priority Tasks: ${criticalTasks.map(t => `"${t.title}" (${t.contributionPoints} pts)`).join(', ') || 'None'}
+Departments (${departments.length}): ${departments.map(d => `${d.name} (${d.memberIds.length} builders)`).join(', ')}
 Total Logged Expenses: $${totalExpense.toLocaleString()}
-Sprint Status: ${sprint?.status || 'None'} (Duration: ${sprint?.durationDays || 0} days)
+Sprint Status: ${sprint?.status || 'Active'} (Duration: ${sprint?.durationDays || 21} days)
 Pending Funding Requests: ${fundingRequests.filter(f => f.status === 'pending').length}
 `;
 
-    const geminiKey = process.env.GEMINI_API_KEY;
     const openAiKey = process.env.OPENAI_API_KEY;
+    const userPrompt = message || (isWhatNext ? 'What are the top 3 tactical priorities I should execute next to maximize sprint velocity and investor readiness?' : 'Analyze my venture health and give me strategic advice');
+    const sysContext = `You are the elite AI Founder Copilot for the startup "${startup.name}" in the ${startup.sector} space. You act as an expert venture partner, principal engineer, and GTM strategist. You have real-time grounded access to this venture's metrics:
+${promptContext}
+Provide sharp, strategic, execution-first guidance with numbered tactical priorities, sprint risk identification, and concrete advice on how to raise the Execution Score towards 90+ for post-sprint investor syndication. Use markdown formatting with bullet points and bold section headers.`;
 
-    if (geminiKey) {
-      try {
-        const sysContext = `You are the AI Founder Copilot for ${startup.name}. You have real-time access to the venture data:\n${promptContext}\nProvide strategic guidance, execution advice, and investor readiness recommendations.`;
-        const geminiRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiKey}`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            contents: [{
-              parts: [{ text: `${sysContext}\n\nUser: ${message || (isWhatNext ? 'What should I do next?' : 'Analyze my startup')}` }]
-            }]
-          })
-        });
-        if (geminiRes.ok) {
-          const data = await geminiRes.json();
-          const generatedText = data.candidates?.[0]?.content?.parts?.[0]?.text;
-          if (generatedText) {
-            const encoder = new TextEncoder();
-            const stream = new ReadableStream({
-              async start(controller) {
-                const words = generatedText.split(' ');
-                for (const word of words) {
-                  controller.enqueue(encoder.encode(`data: ${JSON.stringify({ content: word + ' ' })}\n\n`));
-                  await new Promise(r => setTimeout(r, 15));
-                }
-                controller.enqueue(encoder.encode('data: [DONE]\n\n'));
-                controller.close();
-              }
-            });
-            return new Response(stream, {
-              headers: {
-                'Content-Type': 'text/event-stream',
-                'Cache-Control': 'no-cache',
-                'Connection': 'keep-alive'
-              }
-            });
+    const formattedHistory: GeminiMessage[] = Array.isArray(body.history)
+      ? body.history.map((h: any) => ({
+          role: h.role === 'assistant' || h.role === 'model' ? 'model' : 'user',
+          content: typeof h.text === 'string' ? h.text : (h.content || '')
+        }))
+      : [];
+
+    const geminiResult = await callGemini(userPrompt, {
+      systemPrompt: sysContext,
+      history: formattedHistory,
+      temperature: 0.7,
+      maxOutputTokens: 1200
+    });
+
+    if (geminiResult && geminiResult.text) {
+      const encoder = new TextEncoder();
+      const stream = new ReadableStream({
+        async start(controller) {
+          const words = geminiResult.text.split(' ');
+          for (const word of words) {
+            controller.enqueue(encoder.encode(`data: ${JSON.stringify({ content: word + ' ' })}\n\n`));
+            await new Promise(r => setTimeout(r, 12));
           }
+          controller.enqueue(encoder.encode('data: [DONE]\n\n'));
+          controller.close();
         }
-      } catch (err) {
-        console.warn('[AI] Gemini call failed, falling back to contextual stream:', err);
-      }
+      });
+      return new Response(stream, {
+        headers: {
+          'Content-Type': 'text/event-stream',
+          'Cache-Control': 'no-cache',
+          'Connection': 'keep-alive'
+        }
+      });
     }
 
     if (openAiKey) {

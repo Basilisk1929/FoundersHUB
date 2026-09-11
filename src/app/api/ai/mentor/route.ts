@@ -2,11 +2,12 @@ import { NextRequest } from 'next/server';
 import { authorizeDepartmentAccess } from '@/lib/auth/rbac';
 import { getDb } from '@/lib/db/mongodb';
 import { TaskDoc, TimelineEventDoc } from '@/types';
+import { callGemini, GeminiMessage } from '@/lib/gemini';
 
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { departmentId, message } = body;
+    const { departmentId, message, history = [] } = body;
 
     if (!departmentId || !message) {
       return new Response(JSON.stringify({ error: 'departmentId and message are required' }), { status: 400 });
@@ -27,55 +28,53 @@ export async function POST(req: NextRequest) {
 
     const contextSummary = `
 Department: ${department.name}
-Startup: ${startup.name}
+Startup: ${startup.name} (${startup.tagline})
 Total Tasks: ${tasks.length} (Done: ${completed.length}, In Progress: ${inProgress.length}, Blocked: ${blocked.length})
+Active Deliverables: ${tasks.slice(0, 5).map(t => `"${t.title}" (${t.contributionPoints} pts, ${t.status})`).join(', ')}
 Members Count: ${department.memberIds.length}
 Recent Blockers: ${blocked.map(b => b.title).join(', ') || 'None'}
 `;
 
-    const geminiKey = process.env.GEMINI_API_KEY;
     const openAiKey = process.env.OPENAI_API_KEY;
 
-    if (geminiKey) {
-      try {
-        const sysContext = `You are the AI Department Mentor for the ${department.name} department at ${startup.name}. Department status:\n${contextSummary}\nProvide actionable domain-specific guidance, risk mitigation suggestions, and sprint advice.`;
-        const geminiRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiKey}`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            contents: [{
-              parts: [{ text: `${sysContext}\n\nUser: ${message}` }]
-            }]
-          })
-        });
-        if (geminiRes.ok) {
-          const data = await geminiRes.json();
-          const generatedText = data.candidates?.[0]?.content?.parts?.[0]?.text;
-          if (generatedText) {
-            const encoder = new TextEncoder();
-            const stream = new ReadableStream({
-              async start(controller) {
-                const words = generatedText.split(' ');
-                for (const word of words) {
-                  controller.enqueue(encoder.encode(`data: ${JSON.stringify({ content: word + ' ' })}\n\n`));
-                  await new Promise(r => setTimeout(r, 15));
-                }
-                controller.enqueue(encoder.encode('data: [DONE]\n\n'));
-                controller.close();
-              }
-            });
-            return new Response(stream, {
-              headers: {
-                'Content-Type': 'text/event-stream',
-                'Cache-Control': 'no-cache',
-                'Connection': 'keep-alive'
-              }
-            });
+    const sysContext = `You are the expert AI Department Mentor for the "${department.name}" department at "${startup.name}". You act as a staff-level principal in this domain (e.g. Staff Software Engineer for Engineering, VP Design for Design, VP Growth for Marketing). Department real-time context:
+${contextSummary}
+Provide deeply practical, domain-specific mentorship, architectural advice, implementation steps, and sprint velocity optimization. Format with markdown.`;
+
+    const formattedHistory: GeminiMessage[] = Array.isArray(history)
+      ? history.map((h: any) => ({
+          role: h.role === 'assistant' || h.role === 'model' ? 'model' : 'user',
+          content: typeof h.text === 'string' ? h.text : (h.content || '')
+        }))
+      : [];
+
+    const geminiResult = await callGemini(message, {
+      systemPrompt: sysContext,
+      history: formattedHistory,
+      temperature: 0.7,
+      maxOutputTokens: 900
+    });
+
+    if (geminiResult && geminiResult.text) {
+      const encoder = new TextEncoder();
+      const stream = new ReadableStream({
+        async start(controller) {
+          const words = geminiResult.text.split(' ');
+          for (const word of words) {
+            controller.enqueue(encoder.encode(`data: ${JSON.stringify({ content: word + ' ' })}\n\n`));
+            await new Promise(r => setTimeout(r, 12));
           }
+          controller.enqueue(encoder.encode('data: [DONE]\n\n'));
+          controller.close();
         }
-      } catch (err) {
-        console.warn('[AI] Gemini call failed in mentor, falling back:', err);
-      }
+      });
+      return new Response(stream, {
+        headers: {
+          'Content-Type': 'text/event-stream',
+          'Cache-Control': 'no-cache',
+          'Connection': 'keep-alive'
+        }
+      });
     }
 
     if (openAiKey) {
