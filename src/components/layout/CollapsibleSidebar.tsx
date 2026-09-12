@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useSearchParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   ChevronLeft, 
@@ -30,7 +30,8 @@ import {
   User,
   PanelLeftClose,
   PanelLeftOpen,
-  X
+  X,
+  Users
 } from 'lucide-react';
 import { useAuth } from '../auth/AuthContext';
 
@@ -52,11 +53,11 @@ interface NavSection {
 
 export function CollapsibleSidebar() {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   const { user } = useAuth();
 
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
-  const [activeSection, setActiveSection] = useState<'all' | 'founder' | 'developer' | 'investor'>('all');
   const [hoveredItem, setHoveredItem] = useState<string | null>(null);
 
   // Initialize collapse preference from localStorage
@@ -80,7 +81,7 @@ export function CollapsibleSidebar() {
   // Close mobile drawer on route change
   useEffect(() => {
     setIsMobileOpen(false);
-  }, [pathname]);
+  }, [pathname, searchParams]);
 
   const sections: NavSection[] = [
     {
@@ -90,12 +91,13 @@ export function CollapsibleSidebar() {
       accentColor: 'from-purple-500/20 to-indigo-500/10 text-purple-400 border-purple-500/30',
       items: [
         { name: 'Command Center', href: '/dashboard/founder', icon: LayoutDashboard, badge: 'Hub' },
-        { name: 'View Ideas & Gates', href: '/dashboard/founder#ideas', icon: Lightbulb },
+        { name: 'View Ideas & Gates', href: '/dashboard/founder?tab=ideas', icon: Lightbulb },
         { name: '8-Dept Project Tools', href: '/departments', icon: Layers, badge: '8 Depts' },
-        { name: 'Pitch & Media Assets', href: '/dashboard/founder#media', icon: Video, badge: 'YT / PPT' },
-        { name: 'AI Founder Copilot', href: '/dashboard/founder#copilot', icon: Bot, badge: 'Gemini' },
-        { name: 'Governance & Intake', href: '/dashboard/founder#governance', icon: ShieldAlert },
-        { name: 'Submit New Idea', href: '/dashboard/founder#new-idea', icon: PlusCircle },
+        { name: 'Pitch & Media Assets', href: '/dashboard/founder?tab=media', icon: Video, badge: 'YT / PPT' },
+        { name: 'Department Rosters', href: '/dashboard/founder?tab=team', icon: Users, badge: 'Team' },
+        { name: 'AI Founder Copilot', href: '/dashboard/founder?tab=copilot', icon: Bot, badge: 'Gemini' },
+        { name: 'Governance & Intake', href: '/dashboard/founder?tab=governance', icon: ShieldAlert },
+        { name: 'Submit New Idea', href: '/dashboard/founder?tab=new-idea', icon: PlusCircle },
       ]
     },
     {
@@ -105,10 +107,9 @@ export function CollapsibleSidebar() {
       accentColor: 'from-sky-500/20 to-blue-500/10 text-sky-400 border-sky-500/30',
       items: [
         { name: 'Dev Workspace', href: '/dashboard/developer', icon: Code2, badge: 'Sprint' },
-        { name: 'Active Backlog Tasks', href: '/dashboard/developer#tasks', icon: CheckSquare },
+        { name: 'Active Backlog Tasks', href: '/dashboard/developer?tab=tasks', icon: CheckSquare },
         { name: 'Department Kanbans', href: '/departments', icon: Kanban, badge: 'Boards' },
-        { name: 'Dynamic Equity Points', href: '/dashboard/developer#vesting', icon: Award, badge: 'Ledger' },
-        { name: 'AI Technical Mentor', href: '/dashboard/developer#mentor', icon: Sparkles, badge: 'Smart' },
+        { name: 'Dynamic Equity Points', href: '/dashboard/developer?tab=vesting', icon: Award, badge: 'Ledger' },
         { name: 'Explore Sprints', href: '/discover', icon: Compass },
       ]
     },
@@ -119,9 +120,9 @@ export function CollapsibleSidebar() {
       accentColor: 'from-emerald-500/20 to-teal-500/10 text-emerald-400 border-emerald-500/30',
       items: [
         { name: 'Investor Dealroom', href: '/dashboard/investor', icon: TrendingUp, badge: 'Live' },
-        { name: 'Verified Ventures', href: '/discover', icon: Compass },
-        { name: 'Escrow Commitments', href: '/dashboard/investor#portfolio', icon: CreditCard, badge: 'Razorpay' },
-        { name: 'Branding Partner Strip', href: '/dashboard/investor#branding', icon: Briefcase, badge: '30-Day' },
+        { name: 'Verified Ventures', href: '/discover?stage=sprint_completed', icon: Compass },
+        { name: 'Escrow Commitments', href: '/dashboard/investor?tab=portfolio', icon: CreditCard, badge: 'Razorpay' },
+        { name: 'Branding Partner Strip', href: '/dashboard/investor?tab=branding', icon: Briefcase, badge: '30-Day' },
         { name: 'Trust & SPV Shield', href: '/trust', icon: ShieldCheck },
       ]
     },
@@ -139,10 +140,24 @@ export function CollapsibleSidebar() {
     }
   ];
 
-  // Filter sections if user picked a specific view
-  const filteredSections = activeSection === 'all' 
-    ? sections 
-    : sections.filter(s => s.id === activeSection || s.id === 'platform');
+  // Role-strict filtering: Developer only sees Developer suite, Founder sees Founder, Investor sees Investor
+  const userRole = user?.role;
+  const filteredSections = sections.filter(sec => {
+    if (sec.id === 'platform') return true;
+    if (!userRole) return false;
+    return sec.id === userRole;
+  });
+
+  // Calculate exact active state so only one item is selected
+  const currentTab = searchParams.get('tab');
+  const fullCurrentPath = currentTab ? `${pathname}?tab=${currentTab}` : pathname;
+
+  const isItemActive = (itemHref: string) => {
+    if (itemHref.includes('?tab=')) {
+      return fullCurrentPath === itemHref;
+    }
+    return pathname === itemHref && !currentTab;
+  };
 
   const content = (
     <div className="flex flex-col h-full bg-[#0d121f]/95 backdrop-blur-xl border-r border-white/10 select-none">
@@ -156,7 +171,9 @@ export function CollapsibleSidebar() {
             </div>
             <div className="flex flex-col truncate">
               <span className="font-bold text-xs text-white tracking-tight">FoundersHub</span>
-              <span className="text-[10px] text-slate-400 truncate">Navigation Portal</span>
+              <span className="text-[10px] text-slate-400 truncate capitalize">
+                {userRole ? `${userRole} Portal` : 'Platform Portal'}
+              </span>
             </div>
           </div>
         )}
@@ -171,7 +188,7 @@ export function CollapsibleSidebar() {
 
         <button
           onClick={toggleCollapse}
-          className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-white/10 transition-colors shrink-0 hidden lg:flex items-center justify-center"
+          className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-white/10 transition-colors shrink-0 hidden lg:flex items-center justify-center cursor-pointer"
           title={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
         >
           {isCollapsed ? <PanelLeftOpen className="w-4 h-4" /> : <PanelLeftClose className="w-4 h-4" />}
@@ -180,48 +197,24 @@ export function CollapsibleSidebar() {
         {/* Mobile close */}
         <button
           onClick={() => setIsMobileOpen(false)}
-          className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-white/10 transition-colors lg:hidden"
+          className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-white/10 transition-colors lg:hidden cursor-pointer"
         >
           <X className="w-5 h-5" />
         </button>
       </div>
 
-      {/* Role Filter Tabs (Only in expanded mode) */}
+      {/* Role Banner Badge */}
       {!isCollapsed && (
-        <div className="p-2 border-b border-white/5 shrink-0 bg-black/20">
-          <div className="grid grid-cols-4 gap-1 p-1 rounded-xl bg-white/[0.03] border border-white/5 text-[10px]">
-            <button
-              onClick={() => setActiveSection('all')}
-              className={`py-1 rounded-lg font-medium transition-all ${
-                activeSection === 'all' ? 'bg-white/15 text-white font-semibold shadow-sm' : 'text-slate-400 hover:text-slate-200'
-              }`}
-            >
-              All
-            </button>
-            <button
-              onClick={() => setActiveSection('founder')}
-              className={`py-1 rounded-lg font-medium transition-all ${
-                activeSection === 'founder' ? 'bg-purple-600 text-white font-semibold shadow-sm' : 'text-slate-400 hover:text-purple-300'
-              }`}
-            >
-              Founder
-            </button>
-            <button
-              onClick={() => setActiveSection('developer')}
-              className={`py-1 rounded-lg font-medium transition-all ${
-                activeSection === 'developer' ? 'bg-sky-600 text-white font-semibold shadow-sm' : 'text-slate-400 hover:text-sky-300'
-              }`}
-            >
-              Dev
-            </button>
-            <button
-              onClick={() => setActiveSection('investor')}
-              className={`py-1 rounded-lg font-medium transition-all ${
-                activeSection === 'investor' ? 'bg-emerald-600 text-white font-semibold shadow-sm' : 'text-slate-400 hover:text-emerald-300'
-              }`}
-            >
-              Investor
-            </button>
+        <div className="px-3 py-2 border-b border-white/5 bg-black/20">
+          <div className="flex items-center gap-2 px-2.5 py-1.5 rounded-xl bg-white/[0.03] border border-white/5">
+            <span className={`w-2 h-2 rounded-full ${
+              userRole === 'founder' ? 'bg-purple-400' :
+              userRole === 'developer' ? 'bg-sky-400' :
+              userRole === 'investor' ? 'bg-emerald-400' : 'bg-slate-400'
+            }`} />
+            <span className="text-[11px] font-semibold text-slate-300 capitalize">
+              {userRole ? `${userRole} Workspace` : 'Guest Explorer'}
+            </span>
           </div>
         </div>
       )}
@@ -249,7 +242,7 @@ export function CollapsibleSidebar() {
               <div className="space-y-0.5">
                 {sec.items.map(item => {
                   const ItemIcon = item.icon;
-                  const isActive = pathname === item.href || (item.href.includes('#') && pathname === item.href.split('#')[0]);
+                  const active = isItemActive(item.href);
 
                   return (
                     <div
@@ -261,13 +254,13 @@ export function CollapsibleSidebar() {
                       <Link
                         href={item.href}
                         className={`flex items-center gap-3 px-2.5 py-2 rounded-xl text-xs font-medium transition-all ${
-                          isActive
-                            ? 'bg-indigo-600/20 text-white border border-indigo-500/40 shadow-sm shadow-indigo-500/10'
-                            : 'text-slate-300 hover:text-white hover:bg-white/5 border border-transparent'
+                          active
+                            ? 'bg-indigo-600/25 text-white border border-indigo-500/50 shadow-md shadow-indigo-500/15 font-semibold'
+                            : 'text-slate-400 hover:text-white hover:bg-white/5 border border-transparent'
                         }`}
                       >
                         <ItemIcon className={`w-4 h-4 shrink-0 transition-colors ${
-                          isActive ? 'text-indigo-400' : 'text-slate-400 group-hover:text-white'
+                          active ? 'text-indigo-400' : 'text-slate-400 group-hover:text-white'
                         }`} />
 
                         {!isCollapsed && (

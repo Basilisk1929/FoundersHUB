@@ -25,7 +25,8 @@ import {
   PauseCircle,
   PlayCircle,
   PlusCircle,
-  UserMinus
+  UserMinus,
+  ArrowRightLeft
 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
@@ -39,6 +40,7 @@ function FounderDashboardContent() {
   const { user } = useAuth();
   const searchParams = useSearchParams();
   const initialStartupId = searchParams.get('startupId');
+  const currentTab = searchParams.get('tab');
 
   const [startups, setStartups] = useState<StartupDoc[]>([]);
   const [selectedStartup, setSelectedStartup] = useState<StartupDoc | null>(null);
@@ -100,6 +102,15 @@ function FounderDashboardContent() {
   ]);
   const [copilotStreaming, setCopilotStreaming] = useState(false);
 
+  // Member Transfer Across Departments State
+  const [transferModalOpen, setTransferModalOpen] = useState(false);
+  const [transferMemberId, setTransferMemberId] = useState<string | null>(null);
+  const [transferMemberName, setTransferMemberName] = useState<string>('');
+  const [transferSourceDeptId, setTransferSourceDeptId] = useState<string | null>(null);
+  const [transferTargetDeptId, setTransferTargetDeptId] = useState<string>('');
+  const [isTransferring, setIsTransferring] = useState(false);
+  const [transferSuccessMessage, setTransferSuccessMessage] = useState<string | null>(null);
+
   useEffect(() => {
     fetchFounderData();
 
@@ -118,6 +129,23 @@ function FounderDashboardContent() {
     window.addEventListener('hashchange', handleHash);
     return () => window.removeEventListener('hashchange', handleHash);
   }, [initialStartupId]);
+
+  // Clean Tab Query Parameter Navigation (Single-action per option)
+  useEffect(() => {
+    if (!currentTab) return;
+    if (currentTab === 'new-idea') {
+      setCreateModalOpen(true);
+    } else if (currentTab === 'copilot') {
+      setCopilotOpen(true);
+    } else {
+      setTimeout(() => {
+        const el = document.getElementById(currentTab);
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }, 150);
+    }
+  }, [currentTab]);
 
   const fetchFounderData = async () => {
     setLoading(true);
@@ -352,6 +380,49 @@ function FounderDashboardContent() {
       }
     } catch (e) {
       console.error('Unassign builder error:', e);
+    }
+  };
+
+  const openTransferModal = (sourceDeptId: string, memberId: string, memberName: string) => {
+    setTransferSourceDeptId(sourceDeptId);
+    setTransferMemberId(memberId);
+    setTransferMemberName(memberName);
+    const availableTargets = departments.filter(d => d._id !== sourceDeptId);
+    setTransferTargetDeptId(availableTargets[0]?._id || '');
+    setTransferSuccessMessage(null);
+    setTransferModalOpen(true);
+  };
+
+  const handleConfirmTransfer = async () => {
+    if (!transferSourceDeptId || !transferMemberId || !transferTargetDeptId) return;
+    setIsTransferring(true);
+    try {
+      const res = await fetch(`/api/departments/${transferSourceDeptId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'transfer_member',
+          memberId: transferMemberId,
+          targetDepartmentId: transferTargetDeptId
+        })
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setTransferSuccessMessage(data.message || 'Builder transferred successfully!');
+        if (selectedStartup) {
+          await selectStartup(selectedStartup);
+        }
+        setTimeout(() => {
+          setTransferModalOpen(false);
+          setTransferSuccessMessage(null);
+        }, 1200);
+      } else {
+        alert(data.error || 'Failed to transfer builder');
+      }
+    } catch (e) {
+      console.error('Transfer builder error:', e);
+    } finally {
+      setIsTransferring(false);
     }
   };
 
@@ -1101,9 +1172,9 @@ function FounderDashboardContent() {
 
             </div>
 
-            {/* Department Builder Roster with Unassign Actions */}
+            {/* Department Builder Roster with Transfer & Unassign Actions */}
             {departments.length > 0 && (
-              <div className="pt-2 border-t border-white/10 space-y-3">
+              <div id="team" className="pt-4 border-t border-white/10 space-y-3">
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-bold text-white flex items-center gap-2">
                     <Users className="w-3.5 h-3.5 text-indigo-400" />
@@ -1117,28 +1188,51 @@ function FounderDashboardContent() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
                   {departments.map((d) => (
                     <div key={d._id} className="p-3 rounded-xl bg-black/30 border border-white/5 space-y-2 text-xs">
-                      <div className="font-semibold text-white truncate">{d.name}</div>
+                      <div className="flex items-center justify-between">
+                        <span className="font-semibold text-white truncate">{d.name}</span>
+                        <span className="text-[10px] px-1.5 py-0.5 rounded bg-white/5 text-slate-400 font-mono">
+                          {d.memberIds?.length || 0}
+                        </span>
+                      </div>
                       <div className="text-[11px] text-slate-400">
                         {d.memberIds?.length || 0} active builder{d.memberIds?.length === 1 ? '' : 's'}
                       </div>
                       {d.memberIds && d.memberIds.length > 0 ? (
-                        <div className="space-y-1 pt-1 border-t border-white/5">
-                          {d.memberIds.map((mId) => (
-                            <div key={mId} className="flex items-center justify-between text-[10px] py-0.5">
-                              <span className="text-slate-300 truncate max-w-[120px]">{mId}</span>
-                              <button
-                                type="button"
-                                onClick={() => handleUnassignBuilder(d._id, mId)}
-                                className="text-red-400 hover:text-red-300 p-0.5 hover:bg-red-500/10 rounded cursor-pointer"
-                                title="Unassign Builder"
-                              >
-                                <UserMinus className="w-3 h-3" />
-                              </button>
-                            </div>
-                          ))}
+                        <div className="space-y-1.5 pt-1.5 border-t border-white/5">
+                          {d.memberIds.map((mId) => {
+                            const app = applications.find(a => a.developerId === mId);
+                            const displayName = app?.developerName || (mId.startsWith('usr_') ? `Builder ${mId.slice(-4)}` : mId);
+
+                            return (
+                              <div key={mId} className="flex items-center justify-between text-[11px] py-1 border-b border-white/[0.04] last:border-0">
+                                <div className="flex flex-col truncate max-w-[125px]">
+                                  <span className="text-white font-medium truncate">{displayName}</span>
+                                  <span className="text-[9px] text-slate-500 font-mono truncate">{mId}</span>
+                                </div>
+                                <div className="flex items-center gap-1 shrink-0">
+                                  <button
+                                    type="button"
+                                    onClick={() => openTransferModal(d._id, mId, displayName)}
+                                    className="text-sky-400 hover:text-sky-300 p-1 hover:bg-sky-500/10 rounded cursor-pointer transition-colors"
+                                    title="Transfer to another department"
+                                  >
+                                    <ArrowRightLeft className="w-3.5 h-3.5" />
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => handleUnassignBuilder(d._id, mId)}
+                                    className="text-red-400 hover:text-red-300 p-1 hover:bg-red-500/10 rounded cursor-pointer transition-colors"
+                                    title="Unassign Builder"
+                                  >
+                                    <UserMinus className="w-3.5 h-3.5" />
+                                  </button>
+                                </div>
+                              </div>
+                            );
+                          })}
                         </div>
                       ) : (
-                        <div className="text-[10px] text-slate-500 italic">No builders assigned yet</div>
+                        <div className="text-[10px] text-slate-500 italic py-1">No builders assigned yet</div>
                       )}
                     </div>
                   ))}
@@ -1648,6 +1742,72 @@ function FounderDashboardContent() {
             </Button>
           </div>
         </form>
+      </Modal>
+
+      {/* Modal: Transfer Builder Across Departments */}
+      <Modal
+        isOpen={transferModalOpen}
+        onClose={() => setTransferModalOpen(false)}
+        title="Transfer Builder to Department"
+        subtitle={`Reassign ${transferMemberName} to an alternate execution department.`}
+      >
+        <div className="space-y-4">
+          {transferSuccessMessage ? (
+            <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-xs flex items-center gap-2">
+              <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+              <span>{transferSuccessMessage}</span>
+            </div>
+          ) : (
+            <>
+              <div>
+                <label className="block text-xs font-semibold text-slate-300 mb-1">Builder</label>
+                <div className="p-2.5 rounded-xl bg-white/5 border border-white/10 text-xs text-white font-semibold">
+                  {transferMemberName} <span className="text-slate-500 text-[10px] font-mono">({transferMemberId})</span>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-300 mb-1">Target Department</label>
+                <select
+                  value={transferTargetDeptId}
+                  onChange={(e) => setTransferTargetDeptId(e.target.value)}
+                  className="w-full glass-input px-3 py-2 text-xs text-white bg-slate-900 border border-white/10"
+                >
+                  {departments
+                    .filter(d => d._id !== transferSourceDeptId)
+                    .map(dept => (
+                      <option key={dept._id} value={dept._id}>
+                        {dept.name} ({dept.memberIds?.length || 0} active members)
+                      </option>
+                    ))}
+                </select>
+              </div>
+
+              <p className="text-[11px] text-slate-400 leading-relaxed">
+                Transferring this builder grants them workspace access, tasks, and team communication in the target department while keeping their historical contribution points and equity share intact.
+              </p>
+
+              <div className="flex justify-end gap-2 pt-2">
+                <Button
+                  type="button"
+                  variant="ghost"
+                  onClick={() => setTransferModalOpen(false)}
+                  disabled={isTransferring}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="button"
+                  variant="glow"
+                  isLoading={isTransferring}
+                  onClick={handleConfirmTransfer}
+                >
+                  Confirm Transfer
+                </Button>
+              </div>
+            </>
+          )}
+        </div>
       </Modal>
 
     </div>

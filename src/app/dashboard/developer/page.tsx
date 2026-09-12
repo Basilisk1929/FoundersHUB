@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { 
   Code2, 
   Zap, 
@@ -19,8 +20,11 @@ import { ProgressRing } from '@/components/ui/ProgressRing';
 import { useAuth } from '@/components/auth/AuthContext';
 import { TaskDoc, ApplicationDoc } from '@/types';
 
-export default function DeveloperDashboardPage() {
+function DeveloperDashboardContent() {
   const { user, refreshUser } = useAuth();
+  const searchParams = useSearchParams();
+  const currentTab = searchParams.get('tab');
+
   const [applications, setApplications] = useState<ApplicationDoc[]>([]);
   const [tasks, setTasks] = useState<TaskDoc[]>([]);
   const [loading, setLoading] = useState(true);
@@ -31,6 +35,16 @@ export default function DeveloperDashboardPage() {
   useEffect(() => {
     fetchDeveloperData();
   }, []);
+
+  useEffect(() => {
+    if (!currentTab) return;
+    setTimeout(() => {
+      const el = document.getElementById(currentTab);
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }, 150);
+  }, [currentTab]);
 
   const fetchDeveloperData = async () => {
     setLoading(true);
@@ -332,11 +346,16 @@ export default function DeveloperDashboardPage() {
               </div>
             )}
           </div>
-
         </div>
-
       </div>
-
     </div>
+  );
+}
+
+export default function DeveloperDashboardPage() {
+  return (
+    <Suspense fallback={<div className="max-w-7xl mx-auto px-4 py-20 text-center text-xs text-slate-400">Loading Developer Workspace...</div>}>
+      <DeveloperDashboardContent />
+    </Suspense>
   );
 }

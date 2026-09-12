@@ -15,7 +15,10 @@ export async function POST(req: NextRequest) {
     const geminiKey = getGeminiApiKey();
     if (geminiKey) {
       try {
-        const prompt = `Generate a structured ${sprintDays}-day sprint roadmap for the ${department.name} department of the venture "${startup.name}" (${startup.tagline}). Return JSON with an array of objects for each week, having fields: week (number), title (string), goals (array of 3 strings), and suggestedTasks (array of 2 objects with title, points 10-30, priority 'high'|'medium').`;
+        const prompt = `Generate a structured ${sprintDays}-day sprint roadmap for the ${department.name} department of the venture "${startup.name}" in the ${startup.sector} sector.
+Problem Statement: ${startup.problemStatement}
+Description: ${startup.description || startup.tagline}
+Return JSON with an array of objects for each week, having fields: week (number), title (string), goals (array of 3 strings), and suggestedTasks (array of 2 objects with title, description, points 10-30, priority 'critical'|'high'|'medium').`;
         const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiKey}`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -48,13 +51,13 @@ export async function POST(req: NextRequest) {
         week: w,
         title: `Week ${w}: ${w === 1 ? 'Architecture & Setup' : w === 2 ? 'Core Implementation & Integration' : 'Hardening, QA & Delivery'}`,
         goals: [
-          `Define critical path dependencies for ${department.name}`,
-          `Execute high-point Kanban deliverables`,
-          `Validate milestones with ${startup.name} leadership`
+          `Implement critical path deliverables for ${department.name} solving: "${startup.problemStatement.slice(0, 80)}..."`,
+          `Execute high-point Kanban tasks directly aligned with "${startup.tagline}"`,
+          `Validate milestones against user feedback and metric requirements`
         ],
         suggestedTasks: [
-          { title: `${department.name} Milestone Alpha`, points: 25, priority: 'high' },
-          { title: `Integration test & verification for sprint W${w}`, points: 20, priority: 'medium' }
+          { title: `${department.name} Core Pipeline Alpha`, description: `Implement specifications to solve "${startup.problemStatement.slice(0, 100)}..."`, points: 25, priority: 'high' },
+          { title: `Integration test & verification for sprint W${w}`, description: `Unit tests and integration review for ${department.name} deliverables`, points: 20, priority: 'medium' }
         ]
       });
     }

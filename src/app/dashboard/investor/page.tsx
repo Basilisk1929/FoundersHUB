@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
 import Image from 'next/image';
 import { 
   TrendingUp, 
@@ -26,8 +27,11 @@ import { openRazorpayCheckout } from '@/lib/razorpay-client';
 import { PitchMediaViewer } from '@/components/media/PitchMediaViewer';
 import { StartupDoc, FundingRequestDoc } from '@/types';
 
-export default function InvestorDashboardPage() {
+function InvestorDashboardContent() {
   const { user } = useAuth();
+  const searchParams = useSearchParams();
+  const currentTab = searchParams.get('tab');
+
   const [completedStartups, setCompletedStartups] = useState<StartupDoc[]>([]);
   const [myInvestments, setMyInvestments] = useState<FundingRequestDoc[]>([]);
   const [loading, setLoading] = useState(true);
@@ -46,6 +50,16 @@ export default function InvestorDashboardPage() {
   useEffect(() => {
     fetchInvestorData();
   }, []);
+
+  useEffect(() => {
+    if (!currentTab) return;
+    setTimeout(() => {
+      const el = document.getElementById(currentTab) || (currentTab === 'branding' ? document.getElementById('portfolio') : null);
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }, 150);
+  }, [currentTab]);
 
   const fetchInvestorData = async () => {
     setLoading(true);
@@ -575,5 +589,13 @@ export default function InvestorDashboardPage() {
       </Modal>
 
     </div>
+  );
+}
+
+export default function InvestorDashboardPage() {
+  return (
+    <Suspense fallback={<div className="max-w-7xl mx-auto px-4 py-20 text-center text-xs text-slate-400">Loading Investor Dealroom...</div>}>
+      <InvestorDashboardContent />
+    </Suspense>
   );
 }

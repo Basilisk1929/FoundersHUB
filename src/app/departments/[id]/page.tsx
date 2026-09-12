@@ -175,17 +175,105 @@ export default function DepartmentWorkspacePage() {
     }
   };
 
+  const [addedTaskTitles, setAddedTaskTitles] = useState<Set<string>>(new Set());
+  const [savedSopTitles, setSavedSopTitles] = useState<Set<string>>(new Set());
+  const [isActionLoading, setIsActionLoading] = useState<string | null>(null);
+
+  const handleAddSingleGeneratedTask = async (task: { title: string; description?: string; priority?: string; contributionPoints?: number }) => {
+    if (!department) return;
+    setIsActionLoading(task.title);
+    try {
+      const res = await fetch('/api/tasks', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          departmentId: department._id,
+          title: task.title,
+          description: task.description || '',
+          priority: task.priority || 'medium',
+          contributionPoints: task.contributionPoints || 20
+        })
+      });
+      const data = await res.json();
+      if (res.ok && data.task) {
+        setTasks(prev => [...prev, data.task]);
+        setAddedTaskTitles(prev => new Set(prev).add(task.title));
+      }
+    } catch (err) {
+      console.error('Failed to add generated task:', err);
+    } finally {
+      setIsActionLoading(null);
+    }
+  };
+
+  const handleAddAllGeneratedTasks = async (tasksToAdd: Array<{ title: string; description?: string; priority?: string; contributionPoints?: number }>) => {
+    if (!department) return;
+    setIsActionLoading('all_tasks');
+    try {
+      for (const t of tasksToAdd) {
+        if (addedTaskTitles.has(t.title)) continue;
+        const res = await fetch('/api/tasks', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            departmentId: department._id,
+            title: t.title,
+            description: t.description || '',
+            priority: t.priority || 'medium',
+            contributionPoints: t.contributionPoints || 20
+          })
+        });
+        const data = await res.json();
+        if (res.ok && data.task) {
+          setTasks(prev => [...prev, data.task]);
+          setAddedTaskTitles(prev => new Set(prev).add(t.title));
+        }
+      }
+    } catch (err) {
+      console.error('Failed to add all tasks:', err);
+    } finally {
+      setIsActionLoading(null);
+    }
+  };
+
+  const handleSaveGeneratedSop = async (sop: { title: string; department?: string; version?: string; effectiveDate?: string; purpose?: string; steps?: Array<{ step: number; name: string; action: string }>; complianceNotes?: string }) => {
+    if (!department) return;
+    setIsActionLoading(`sop_${sop.title}`);
+    try {
+      const markdown = `# ${sop.title}\n\n**Department**: ${sop.department || department.name}\n**Effective Date**: ${sop.effectiveDate || new Date().toISOString().split('T')[0]} (v${sop.version || '1.0'})\n\n## Purpose\n${sop.purpose || 'Standard Execution Protocol'}\n\n## Operational Steps\n${(sop.steps || []).map(s => `### Step ${s.step}: ${s.name}\n${s.action}`).join('\n\n')}\n\n## Compliance Notes\n${sop.complianceNotes || 'Strict adherence to FoundersHub delivery protocols.'}`;
+
+      const res = await fetch(`/api/departments/${department._id}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: 'save_sop',
+          fileName: `${sop.title.replace(/[^a-zA-Z0-9_-]/g, '_')}.md`,
+          content: markdown,
+          topic: sop.title
+        })
+      });
+      const data = await res.json();
+      if (res.ok && data.file) {
+        setFiles(prev => [data.file, ...prev]);
+        setSavedSopTitles(prev => new Set(prev).add(sop.title));
+      }
+    } catch (err) {
+      console.error('Failed to save generated SOP:', err);
+    } finally {
+      setIsActionLoading(null);
+    }
+  };
+
   const handleAskMentor = async (customPrompt?: string, actionType?: 'sop' | 'plan') => {
     const p = customPrompt || mentorInput;
     if (!p.trim() && !actionType) return;
 
-    setMentorLogs(prev => [...prev, { role: 'user', text: actionType ? `Generate ${actionType.toUpperCase()}` : p }]);
+    setMentorLogs(prev => [...prev, { role: 'user', text: actionType ? `Generate ${actionType === 'sop' ? 'Standard Operating Procedure (SOP)' : 'Sprint Roadmap & Kanban Deliverables'}` : p }]);
     setMentorInput('');
     setMentorStreaming(true);
 
     try {
-      const endpoint = actionType === 'sop' ? '/api/ai/sop' : actionType === 'plan' ? '/api/ai/planner' : '/api/ai/mentor';
-      const res = await fetch(endpoint, {
+      const res = await fetch('/api/ai/mentor', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -608,18 +696,162 @@ export default function DepartmentWorkspacePage() {
           </div>
 
           {/* Mentor Chat Stream */}
-          <div className="flex-1 overflow-y-auto py-4 space-y-3 text-xs leading-relaxed">
-            {mentorLogs.map((log, idx) => (
-              <div key={idx} className={`flex flex-col ${log.role === 'user' ? 'items-end' : 'items-start'}`}>
-                <div className={`max-w-[90%] rounded-2xl p-3.5 ${
-                  log.role === 'user'
-                    ? 'bg-purple-600 text-white rounded-br-none'
-                    : 'bg-white/5 border border-white/10 text-slate-200 rounded-bl-none whitespace-pre-line'
-                }`}>
-                  {log.text}
+          <div className="flex-1 overflow-y-auto py-4 space-y-4 text-xs leading-relaxed">
+            {mentorLogs.map((log, idx) => {
+              const isUser = log.role === 'user';
+              if (isUser) {
+                return (
+                  <div key={idx} className="flex flex-col items-end">
+                    <div className="max-w-[85%] rounded-2xl p-3.5 bg-purple-600 text-white rounded-br-none shadow-md shadow-purple-600/20">
+                      {log.text}
+                    </div>
+                  </div>
+                );
+              }
+
+              // Extract structured tasks and SOP if present
+              const tasksMatch = log.text.match(/```tasks_json\s*([\s\S]*?)\s*```/);
+              let parsedTasks: any[] | null = null;
+              if (tasksMatch) {
+                try {
+                  const p = JSON.parse(tasksMatch[1]);
+                  if (Array.isArray(p) && p.length > 0) parsedTasks = p;
+                } catch {}
+              }
+
+              const sopMatch = log.text.match(/```sop_json\s*([\s\S]*?)\s*```/);
+              let parsedSop: any | null = null;
+              if (sopMatch) {
+                try {
+                  const s = JSON.parse(sopMatch[1]);
+                  if (s && s.title) parsedSop = s;
+                } catch {}
+              }
+
+              const cleanText = log.text
+                .replace(/```tasks_json\s*[\s\S]*?```/g, '')
+                .replace(/```sop_json\s*[\s\S]*?```/g, '')
+                .trim();
+
+              return (
+                <div key={idx} className="flex flex-col items-start w-full">
+                  <div className="max-w-[95%] rounded-2xl p-4 bg-white/5 border border-white/10 text-slate-200 rounded-bl-none whitespace-pre-line space-y-3">
+                    {cleanText}
+
+                    {/* Interactive Task Cards if Tasks Generated */}
+                    {parsedTasks && parsedTasks.length > 0 && (
+                      <div className="mt-4 pt-3 border-t border-white/10 space-y-3">
+                        <div className="flex items-center justify-between">
+                          <span className="font-bold text-xs text-indigo-300 flex items-center gap-1.5">
+                            <Sparkles className="w-3.5 h-3.5 text-indigo-400" />
+                            <span>Suggested Kanban Deliverables ({parsedTasks.length})</span>
+                          </span>
+                          <button
+                            type="button"
+                            disabled={isActionLoading === 'all_tasks'}
+                            onClick={() => handleAddAllGeneratedTasks(parsedTasks!)}
+                            className="px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-indigo-600 hover:bg-indigo-500 text-white transition-all shadow-sm flex items-center gap-1 cursor-pointer disabled:opacity-50"
+                          >
+                            <Plus className="w-3 h-3" />
+                            <span>Add All to Kanban</span>
+                          </button>
+                        </div>
+
+                        <div className="space-y-2">
+                          {parsedTasks.map((t: any, tIdx: number) => {
+                            const isAdded = addedTaskTitles.has(t.title);
+                            return (
+                              <div
+                                key={tIdx}
+                                className="p-3 rounded-xl bg-black/40 border border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs hover:border-indigo-500/30 transition-colors"
+                              >
+                                <div className="space-y-1 flex-1">
+                                  <div className="flex items-center gap-2 flex-wrap">
+                                    <span className="font-bold text-white text-xs">{t.title}</span>
+                                    <Badge variant="priority" priority={t.priority || 'medium'} />
+                                    <Badge variant="points">{t.contributionPoints || 20}</Badge>
+                                  </div>
+                                  {t.description && (
+                                    <p className="text-[11px] text-slate-400 leading-relaxed line-clamp-2">
+                                      {t.description}
+                                    </p>
+                                  )}
+                                </div>
+
+                                <button
+                                  type="button"
+                                  disabled={isAdded || isActionLoading === t.title}
+                                  onClick={() => handleAddSingleGeneratedTask(t)}
+                                  className={`shrink-0 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1 cursor-pointer ${
+                                    isAdded
+                                      ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 cursor-default'
+                                      : 'bg-indigo-600 hover:bg-indigo-500 text-white shadow-sm'
+                                  }`}
+                                >
+                                  {isAdded ? (
+                                    <>
+                                      <Check className="w-3.5 h-3.5 text-emerald-400" />
+                                      <span>Added to Kanban</span>
+                                    </>
+                                  ) : (
+                                    <>
+                                      <Plus className="w-3.5 h-3.5" />
+                                      <span>Add to Kanban</span>
+                                    </>
+                                  )}
+                                </button>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Interactive SOP Card if SOP Generated */}
+                    {parsedSop && (
+                      <div className="mt-4 pt-3 border-t border-white/10 space-y-3">
+                        <div className="flex items-center justify-between">
+                          <span className="font-bold text-xs text-purple-300 flex items-center gap-1.5">
+                            <FileText className="w-3.5 h-3.5 text-purple-400" />
+                            <span>{parsedSop.title}</span>
+                          </span>
+                          <button
+                            type="button"
+                            disabled={savedSopTitles.has(parsedSop.title) || isActionLoading === `sop_${parsedSop.title}`}
+                            onClick={() => handleSaveGeneratedSop(parsedSop)}
+                            className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all flex items-center gap-1 cursor-pointer ${
+                              savedSopTitles.has(parsedSop.title)
+                                ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 cursor-default'
+                                : 'bg-purple-600 hover:bg-purple-500 text-white shadow-sm'
+                            }`}
+                          >
+                            {savedSopTitles.has(parsedSop.title) ? (
+                              <>
+                                <Check className="w-3.5 h-3.5 text-emerald-400" />
+                                <span>Saved in Vault</span>
+                              </>
+                            ) : (
+                              <>
+                                <FileText className="w-3.5 h-3.5" />
+                                <span>Save SOP to Vault</span>
+                              </>
+                            )}
+                          </button>
+                        </div>
+
+                        <div className="p-3 rounded-xl bg-black/40 border border-white/10 text-xs space-y-2">
+                          <div className="text-[11px] text-slate-300 italic">{parsedSop.purpose}</div>
+                          <div className="text-[10px] text-slate-400">
+                            Version: {parsedSop.version} • {parsedSop.steps?.length || 4} Standard Steps Configured
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
             {mentorStreaming && (
               <div className="text-xs text-purple-400 flex items-center gap-1.5 py-1">
                 <Sparkles className="w-3.5 h-3.5 animate-spin" />
