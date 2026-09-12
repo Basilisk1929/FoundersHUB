@@ -19,7 +19,88 @@ export interface UserDoc {
     attestedAt: string;
   };
   totalPoints?: number;
+  developerProfile?: DeveloperProfile;
   createdAt: string;
+}
+
+export interface PastProject {
+  id: string;
+  title: string;
+  description: string;
+  techStack: string[];
+  primaryLanguage: string;
+  languageColor: string;
+  stars?: number;
+  forks?: number;
+  liveUrl?: string;
+  githubUrl?: string;
+  role?: string;
+  stats?: string;
+  isPinned?: boolean;
+  completedAt?: string;
+}
+
+export interface WorkExperience {
+  id: string;
+  company: string;
+  role: string;
+  period: string;
+  description: string;
+  skills?: string[];
+}
+
+export interface EducationItem {
+  id: string;
+  institution: string;
+  degree: string;
+  year: string;
+  grade?: string;
+}
+
+export interface ContributionDay {
+  date: string;
+  count: number;
+  level: 0 | 1 | 2 | 3 | 4;
+}
+
+export interface DeveloperProfile {
+  handle?: string;
+  headline?: string;
+  location?: string;
+  githubUsername?: string;
+  codechefUsername?: string;
+  linkedinUrl?: string;
+  websiteUrl?: string;
+  rating?: number; // CodeChef rating, e.g. 2184
+  starsRating?: number; // 1-7 stars
+  globalRank?: number;
+  countryRank?: number;
+  division?: string;
+  streakDays?: number;
+  longestStreak?: number;
+  resumeUrl?: string;
+  resumeFilename?: string;
+  resumeLastUpdated?: string;
+  resumeSummary?: string;
+  pastProjects?: PastProject[];
+  experience?: WorkExperience[];
+  education?: EducationItem[];
+  badges?: Array<{
+    id: string;
+    name: string;
+    description: string;
+    icon: string;
+    category: 'sprint' | 'code' | 'equity' | 'honor';
+    unlockedAt: string;
+  }>;
+  languageStats?: Record<string, number>;
+  difficultySolved?: {
+    easy: number;
+    medium: number;
+    hard: number;
+    critical: number;
+  };
+  contributionHeatmap?: ContributionDay[];
 }
 
 export type StartupStage = 

@@ -28,6 +28,170 @@ export async function ensureSeedData() {
     if (!devUser) {
       await usersCol.updateOne({ _id: 'usr_dev_priya' }, { $set: { email: 'developer@founderhub.com', name: 'Priya Sharma' } });
     }
+
+    // Ensure developer profile with GitHub/CodeChef metrics is populated
+    const priyaUser = await usersCol.findOne({ _id: 'usr_dev_priya' });
+    if (priyaUser && (!priyaUser.developerProfile || !priyaUser.developerProfile.pastProjects)) {
+      await usersCol.updateOne(
+        { _id: 'usr_dev_priya' },
+        {
+          $set: {
+            developerProfile: {
+              handle: 'priyasharma',
+              headline: 'Senior Full-Stack & Distributed Systems Engineer | ex-Stripe',
+              location: 'Bengaluru, India',
+              githubUsername: 'priyasharma-dev',
+              codechefUsername: 'priya_coder',
+              linkedinUrl: 'https://linkedin.com/in/priyasharma-dev',
+              websiteUrl: 'https://priyasharma.engineer',
+              rating: 2184,
+              starsRating: 5,
+              globalRank: 142,
+              countryRank: 28,
+              division: 'Division 1',
+              streakDays: 19,
+              longestStreak: 48,
+              resumeUrl: 'https://files.foundershub.dev/resumes/priya-sharma-resume.pdf',
+              resumeFilename: 'Priya_Sharma_Resume.pdf',
+              resumeLastUpdated: '2026-09-08',
+              resumeSummary: 'Systems engineer with 5+ years of production experience in Kubernetes controllers, high-throughput distributed message queues, and low-latency WebSockets in Go & TypeScript.',
+              pastProjects: [
+                {
+                  id: 'proj_ebpf_watch',
+                  title: 'ebpf-cluster-watch',
+                  description: 'Low-overhead Linux eBPF telemetry daemon capturing socket anomalies, packet drops, and thread contention in Kubernetes nodes.',
+                  techStack: ['Go', 'eBPF', 'C', 'Kubernetes', 'Prometheus'],
+                  primaryLanguage: 'Go',
+                  languageColor: '#00ADD8',
+                  stars: 348,
+                  forks: 52,
+                  liveUrl: 'https://ebpf-watch.dev',
+                  githubUrl: 'https://github.com/priyasharma-dev/ebpf-cluster-watch',
+                  role: 'Creator & Lead Maintainer',
+                  stats: '12k+ Docker pulls, 4 production adopters',
+                  isPinned: true,
+                  completedAt: '2026-06'
+                },
+                {
+                  id: 'proj_raft_consensus',
+                  title: 'raft-distributed-consensus',
+                  description: 'Deterministic implementation of the Raft consensus algorithm with dynamic cluster membership changes and log snapshotting.',
+                  techStack: ['Rust', 'Async-std', 'gRPC', 'Protobuf'],
+                  primaryLanguage: 'Rust',
+                  languageColor: '#DEA584',
+                  stars: 512,
+                  forks: 64,
+                  liveUrl: 'https://raft-rs.dev',
+                  githubUrl: 'https://github.com/priyasharma-dev/raft-distributed-consensus',
+                  role: 'Architect',
+                  stats: 'Zero deadlocks under Jepsen chaos testing',
+                  isPinned: true,
+                  completedAt: '2026-03'
+                },
+                {
+                  id: 'proj_turbopack_saas',
+                  title: 'turbopack-enterprise-starter',
+                  description: 'Full-stack Next.js 16 App Router boilerplate featuring strict RBAC, automated micro-sprint tracking, and dynamic equity point ledgers.',
+                  techStack: ['TypeScript', 'Next.js', 'TailwindCSS', 'MongoDB'],
+                  primaryLanguage: 'TypeScript',
+                  languageColor: '#3178C6',
+                  stars: 820,
+                  forks: 130,
+                  liveUrl: 'https://turbopack-starter.dev',
+                  githubUrl: 'https://github.com/priyasharma-dev/turbopack-enterprise-starter',
+                  role: 'Lead Developer',
+                  stats: 'Featured on Next.js ecosystem showcase',
+                  isPinned: true,
+                  completedAt: '2026-08'
+                },
+                {
+                  id: 'proj_pod_scaler',
+                  title: 'k8s-pod-autoscaler-crds',
+                  description: 'Custom Kubernetes controller that adjusts pod vertical resource requests based on 99th percentile response latency.',
+                  techStack: ['Go', 'Kubernetes client-go', 'Grafana'],
+                  primaryLanguage: 'Go',
+                  languageColor: '#00ADD8',
+                  stars: 215,
+                  forks: 31,
+                  liveUrl: 'https://k8s-scaler.io',
+                  githubUrl: 'https://github.com/priyasharma-dev/k8s-pod-autoscaler-crds',
+                  role: 'Core Author',
+                  stats: '30% average cloud bill reduction in staging',
+                  isPinned: true,
+                  completedAt: '2026-05'
+                }
+              ],
+              experience: [
+                {
+                  id: 'exp_1',
+                  company: 'KubeScale AI (via FoundersHub)',
+                  role: 'Core Infrastructure Lead',
+                  period: 'Aug 2026 - Present',
+                  description: 'Leading sprint delivery for autonomous Kubernetes pod autoscaling and eBPF kernel telemetry. Built the custom CRD controller in Go.',
+                  skills: ['Kubernetes', 'Go', 'eBPF', 'Prometheus']
+                },
+                {
+                  id: 'exp_2',
+                  company: 'Stripe',
+                  role: 'Senior Software Engineer (Payments Infrastructure)',
+                  period: '2023 - 2026',
+                  description: 'Scaled global checkout API processing $12B+ annually. Optimized p99 latency by 34ms using distributed caching and connection multiplexing.',
+                  skills: ['Distributed Systems', 'Ruby', 'Java', 'gRPC', 'Redis']
+                }
+              ],
+              education: [
+                {
+                  id: 'edu_1',
+                  institution: 'Indian Institute of Technology, Madras (IIT-M)',
+                  degree: 'B.Tech in Computer Science and Engineering',
+                  year: '2019 - 2023',
+                  grade: 'CGPA 9.4 / 10.0 (Institute Merit Scholar)'
+                }
+              ],
+              badges: [
+                {
+                  id: 'badge_5star',
+                  name: '5-Star Competitive Coder',
+                  description: 'Maintained 2100+ Elo rating in CodeChef algorithms contests.',
+                  icon: 'Award',
+                  category: 'code',
+                  unlockedAt: '2026-07-15'
+                },
+                {
+                  id: 'badge_sprint_master',
+                  name: 'High-Velocity Finisher',
+                  description: 'Completed 5 consecutive 21-day startup execution sprints with 95%+ completion.',
+                  icon: 'Zap',
+                  category: 'sprint',
+                  unlockedAt: '2026-08-30'
+                },
+                {
+                  id: 'badge_equity_leader',
+                  name: 'Top 1% Equity Earner',
+                  description: 'Accrued over 200 contribution points in active venture backlogs.',
+                  icon: 'TrendingUp',
+                  category: 'equity',
+                  unlockedAt: '2026-09-02'
+                }
+              ],
+              languageStats: {
+                TypeScript: 42,
+                Go: 28,
+                Rust: 18,
+                Python: 12
+              },
+              difficultySolved: {
+                easy: 48,
+                medium: 34,
+                hard: 14,
+                critical: 8
+              }
+            }
+          }
+        }
+      );
+    }
+
     const invUser = await usersCol.findOne({ email: 'investor@founderhub.com' });
     if (!invUser) {
       await usersCol.updateOne({ _id: 'usr_investor_vikram' }, { $set: { email: 'investor@founderhub.com', name: 'Vikram Mehta' } });

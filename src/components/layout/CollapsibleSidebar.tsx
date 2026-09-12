@@ -107,6 +107,7 @@ export function CollapsibleSidebar() {
       accentColor: 'from-sky-500/20 to-blue-500/10 text-sky-400 border-sky-500/30',
       items: [
         { name: 'Dev Workspace', href: '/dashboard/developer', icon: Code2, badge: 'Sprint' },
+        { name: 'Developer Profile', href: '/dashboard/developer?tab=profile', icon: User, badge: 'Rating' },
         { name: 'Active Backlog Tasks', href: '/dashboard/developer?tab=tasks', icon: CheckSquare },
         { name: 'Department Kanbans', href: '/departments', icon: Kanban, badge: 'Boards' },
         { name: 'Dynamic Equity Points', href: '/dashboard/developer?tab=vesting', icon: Award, badge: 'Ledger' },
